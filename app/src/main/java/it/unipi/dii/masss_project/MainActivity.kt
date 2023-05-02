@@ -1,12 +1,11 @@
 package it.unipi.dii.masss_project
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
-import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import androidx.databinding.ViewDataBinding
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -16,10 +15,33 @@ class MainActivity : AppCompatActivity() {
             this, R.layout.activity_main)
 
         val button: Button = binding.loginButton
-        button.setOnClickListener {
-            val intent = Intent(this, RecordingActivity::class.java)
-            startActivity(intent)
-        }
+        button.setOnClickListener {onLoginAttempt(binding)}
     }
+
+    private fun onLoginAttempt(binding: ActivityMainBinding) {
+        val intent = Intent(this, RecordingActivity::class.java)
+        // Pass the inserted username to the intent
+        val username: String = binding.inputUsername.text.toString()
+        val password: String = binding.inputPassword.text.toString()
+        if(username != "" && password != "") {
+            intent.putExtra("username", username)
+            startActivity(intent)
+            // TODO: Aggiungi login a Firebased (Database)
+        }
+        else{
+            // Otherwise show error message
+            val message = "Insert an username and password, please"
+            val duration = Toast.LENGTH_LONG
+
+            val toast = Toast.makeText(this, message, duration)
+            toast.show()
+        }
+
+    }
+
+    /*override fun onResume() : Unit
+        super.onResume()
+
+    }*/
 
 }
