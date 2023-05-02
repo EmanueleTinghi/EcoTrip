@@ -22,15 +22,16 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, RecordingActivity::class.java)
         // Pass the inserted username to the intent
         val username: String = binding.inputUsername.text.toString()
+        val email: String = binding.inputEmail.text.toString()
         val password: String = binding.inputPassword.text.toString()
-        if(username != "" || password != "") {
+        if(username != "" || password != "" || email!= "") {
             intent.putExtra("username", username)
             startActivity(intent)
             // TODO: Aggiungi login a Firebased (Database)
         }
         else{
             // Otherwise show error message
-            val message = "Insert an username and password, please"
+            val message = "Insert username, email and password, please"
             val duration = Toast.LENGTH_LONG
 
             val toast = Toast.makeText(this, message, duration)
