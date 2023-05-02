@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "366917765418",
+    "project_id": "masss-6c5b5",
+    "storage_bucket": "masss-6c5b5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:366917765418:android:cf7b767ba433ffba0af653",
+        "android_client_info": {
+          "package_name": "it.unipi.dii.masss_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "366917765418-b3o5kqhqp6l29k0kit6ggjvevojrd67t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgenT47lWItO_zdu-MyBSk4BjhJ-gWohw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "366917765418-b3o5kqhqp6l29k0kit6ggjvevojrd67t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
