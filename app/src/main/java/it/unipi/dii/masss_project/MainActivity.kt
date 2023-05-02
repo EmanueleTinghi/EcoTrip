@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         // Pass the inserted username to the intent
         val username: String = binding.inputUsername.text.toString()
         val password: String = binding.inputPassword.text.toString()
-        if(username != "" && password != "") {
+        if(username != "" || password != "") {
             intent.putExtra("username", username)
             startActivity(intent)
             // TODO: Aggiungi login a Firebased (Database)
