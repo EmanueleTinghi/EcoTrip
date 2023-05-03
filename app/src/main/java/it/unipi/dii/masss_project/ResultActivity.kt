@@ -1,5 +1,6 @@
 package it.unipi.dii.masss_project
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
@@ -12,5 +13,13 @@ class ResultActivity : AppCompatActivity() {
 
         val binding: ActivityResultBinding = DataBindingUtil.setContentView(
             this, R.layout.activity_result)
+
+        val backButton = binding.backButton
+        backButton.setOnClickListener { onBackPressed(binding) }
+    }
+
+    private fun onBackPressed(binding: ActivityResultBinding) {
+        val intent = Intent(this, RecordingActivity::class.java)
+        startActivity(intent)
     }
 }

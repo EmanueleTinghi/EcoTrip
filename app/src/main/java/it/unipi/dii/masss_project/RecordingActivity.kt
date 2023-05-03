@@ -3,6 +3,7 @@ package it.unipi.dii.masss_project
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -31,14 +32,21 @@ class RecordingActivity : AppCompatActivity() {
         val parentLayout = findViewById<ConstraintLayout>(R.id.parentLayout)
         parentLayout.addView(textView)
 
-        val button: Button = binding.startButton
-        button.setOnClickListener {onStartAttempt(binding) }
+        val startButton: Button = binding.startButton
+        startButton.setOnClickListener {onStartAttempt(binding) }
+
+        val resultButton: Button = binding.resultButton
+        resultButton.setOnClickListener {onResult(binding) }
 
     }
 
     private fun onStartAttempt(binding: ActivityRecordingBinding) {
         if (binding.startButton.text == "Start") {
             binding.startButton.text = "Stop"
+
+            val resultButton: Button = binding.resultButton
+            resultButton.visibility = View.INVISIBLE
+
             val message = "Start transportation mode detection"
             val duration = Toast.LENGTH_LONG
 
@@ -50,16 +58,28 @@ class RecordingActivity : AppCompatActivity() {
             // todo: se viene rilevato vehicle -> usare classificatore
         } else {
             binding.startButton.text = "Start"
+
+            val resultButton: Button = binding.resultButton
+            resultButton.visibility = View.VISIBLE
+
             val message = "Stop transportation mode detection"
             val duration = Toast.LENGTH_LONG
 
             val toast = Toast.makeText(this, message, duration)
             toast.show()
 
+            // todo: collezionare risultati del transportation mode
+
+
             // todo: passare ad unl'altra pagina che mostra i risultati ottenuti
-            val intent = Intent(this, ResultActivity::class.java)
-            startActivity(intent)
+            //val intent = Intent(this, ResultActivity::class.java)
+            //startActivity(intent)
         }
 
+    }
+
+    private fun onResult(binding: ActivityRecordingBinding) {
+        val intent = Intent(this, ResultActivity::class.java)
+        startActivity(intent)
     }
 }
