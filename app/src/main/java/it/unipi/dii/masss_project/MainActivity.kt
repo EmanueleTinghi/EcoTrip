@@ -23,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onLoginAttempt() {
+        println("Username: " + binding.inputUsername.text)
         val intent = Intent(this, RecordingActivity::class.java)
 
 
@@ -33,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         if(username != "" || password != "" || email!= "") {
             intent.putExtra("username", username)
             startActivity(intent)
-            // TODO: Aggiungi login a Firebased (Database)
+            // TODO: Aggiungi login a Firebase (Database)
         }
         else{
             // Otherwise show error message
