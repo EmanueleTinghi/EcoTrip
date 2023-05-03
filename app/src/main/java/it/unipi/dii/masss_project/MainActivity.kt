@@ -29,10 +29,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun onLoginAttempt(binding: ActivityMainBinding) {
 
-       val email: String = binding.inputEmail.text.toString()
+        val email: String = binding.inputEmail.text.toString()
         val password: String = binding.inputPassword.text.toString()
 
-        if(password != "" || email!= "") {
+        if(password.isNotEmpty() && email.isNotEmpty()) {
 
             auth = FirebaseAuth.getInstance()
 
