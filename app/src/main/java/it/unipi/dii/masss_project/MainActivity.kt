@@ -14,7 +14,6 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
 
-
 class MainActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
@@ -25,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         val button: Button = binding.loginButton
-        button.setOnClickListener{onLoginAttempt()}
+        button.setOnClickListener {onLoginAttempt(binding)}
     }
 
     private fun onLoginAttempt(binding: ActivityMainBinding) {
@@ -71,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         }
         else{
             // Otherwise show error message
-            val message = "Insert email and password, please"
+            val message = "Insert username, email and password, please"
             val duration = Toast.LENGTH_LONG
 
             val toast = Toast.makeText(this, message, duration)
@@ -139,26 +138,7 @@ class MainActivity : AppCompatActivity() {
 
     /*override fun onResume() : Unit
         super.onResume()
-    override fun onStop() {
-        super.onStop()
 
-        // Save the text to SharedPreferences
-        val prefs = getPreferences(MODE_PRIVATE)
-        val editor = prefs.edit()
-
-        editor.putString("password", binding.inputPassword.text.toString())
-        editor.putString("email", binding.inputEmail.text.toString())
-        editor.apply()
-    }
-
-    override fun onRestart(){
-        super.onRestart()
-
-        // Set the input fields to previous values
-        val prefs = getPreferences(MODE_PRIVATE)
-        binding.inputPassword.setText(prefs.getString("password", ""))
-        binding.inputEmail.setText(prefs.getString("email", ""))
-
-    }
+    }*/
 
 }

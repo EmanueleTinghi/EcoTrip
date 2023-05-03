@@ -5,5 +5,4 @@
     <string name="hint">username</string>
     <string name="insert_password">Insert password:</string>
     <string name="password">password</string>
-    <string name="insert_email">Insert email:</string>
 </resources>
