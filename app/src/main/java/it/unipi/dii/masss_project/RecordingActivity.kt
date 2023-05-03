@@ -14,15 +14,18 @@ import it.unipi.dii.masss_project.databinding.ActivityMainBinding
 import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
 
 class RecordingActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityRecordingBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val username = intent.getStringExtra("username")
 
-        val binding: ActivityRecordingBinding = DataBindingUtil.setContentView(
+        binding= DataBindingUtil.setContentView(
             this, R.layout.activity_recording)
 
         val textView = TextView(this)
-        textView.text = "Welcome ${username}!"
+        "Welcome ${username}!".also { textView.text = it }
         val layoutParams = ConstraintLayout.LayoutParams(
             ConstraintLayout.LayoutParams.MATCH_PARENT, // Width
             ConstraintLayout.LayoutParams.MATCH_PARENT // Height

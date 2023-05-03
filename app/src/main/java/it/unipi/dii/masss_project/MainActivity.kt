@@ -8,18 +8,24 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
 
+
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding: ActivityMainBinding = DataBindingUtil.setContentView(
+        binding = DataBindingUtil.setContentView(
             this, R.layout.activity_main)
 
         val button: Button = binding.loginButton
-        button.setOnClickListener {onLoginAttempt(binding)}
+        button.setOnClickListener{onLoginAttempt()}
     }
 
-    private fun onLoginAttempt(binding: ActivityMainBinding) {
+    private fun onLoginAttempt() {
         val intent = Intent(this, RecordingActivity::class.java)
+
+
         // Pass the inserted username to the intent
         val username: String = binding.inputUsername.text.toString()
         val email: String = binding.inputEmail.text.toString()
@@ -40,9 +46,28 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    /*override fun onResume() : Unit
-        super.onResume()
+    override fun onStop() {
+        super.onStop()
 
-    }*/
+        // Save the text to SharedPreferences
+        val prefs = getPreferences(MODE_PRIVATE)
+        val editor = prefs.edit()
+
+        editor.putString("username", binding.inputUsername.text.toString())
+        editor.putString("password", binding.inputPassword.text.toString())
+        editor.putString("email", binding.inputEmail.text.toString())
+        editor.apply()
+    }
+
+    override fun onRestart(){
+        super.onRestart()
+
+        // Set the input fields to previous values
+        val prefs = getPreferences(MODE_PRIVATE)
+        binding.inputUsername.setText(prefs.getString("username", ""))
+        binding.inputPassword.setText(prefs.getString("password", ""))
+        binding.inputEmail.setText(prefs.getString("email", ""))
+
+    }
 
 }
