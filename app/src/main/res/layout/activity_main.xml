@@ -4,58 +4,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/parentLayoutMainActivity"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MainActivity">
-
-        <TextView
-            android:id="@+id/usernameView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="150dp"
-            android:text="@string/insert_username"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.028" />
 
         <Button
             android:id="@+id/loginButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="160dp"
-            android:layout_marginTop="528dp"
+            android:layout_marginStart="164dp"
+            android:layout_marginTop="448dp"
             android:text="@string/login"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/inputBoxUsername"
-            android:layout_width="300dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="200dp"
-            android:layout_marginEnd="30dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.49"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/inputUsername"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/hint" />
-        </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
             android:id="@+id/emailView"
             android:layout_width="106dp"
             android:layout_height="19dp"
-            android:layout_marginStart="150dp"
-            android:layout_marginTop="285dp"
+            android:layout_marginStart="52dp"
+            android:layout_marginTop="196dp"
             android:text="Insert email:"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -65,7 +34,7 @@
             android:layout_width="300dp"
             android:layout_height="50dp"
             android:layout_marginStart="30dp"
-            android:layout_marginTop="325dp"
+            android:layout_marginTop="225dp"
             android:layout_marginEnd="30dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.49"
@@ -83,8 +52,8 @@
             android:id="@+id/passwordView"
             android:layout_width="106dp"
             android:layout_height="19dp"
-            android:layout_marginStart="150dp"
-            android:layout_marginTop="400dp"
+            android:layout_marginStart="52dp"
+            android:layout_marginTop="304dp"
             android:text="@string/insert_password"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -94,7 +63,7 @@
             android:layout_width="300dp"
             android:layout_height="50dp"
             android:layout_marginStart="30dp"
-            android:layout_marginTop="435dp"
+            android:layout_marginTop="335dp"
             android:layout_marginEnd="30dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.49"
@@ -105,8 +74,22 @@
                 android:id="@+id/inputPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/password" />
+                android:hint="@string/password"
+                android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/errorTextView"
+            android:layout_width="292dp"
+            android:layout_height="29dp"
+            android:layout_marginStart="55dp"
+            android:layout_marginTop="412dp"
+            android:layout_marginEnd="49dp"
+            android:text="TextView"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

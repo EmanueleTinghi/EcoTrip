@@ -29,7 +29,7 @@ class RecordingActivity : AppCompatActivity() {
         )
         layoutParams.setMargins(425, 750, 0, 0) // Left, Top, Right, Bottom margins
         textView.layoutParams = layoutParams
-        val parentLayout = findViewById<ConstraintLayout>(R.id.parentLayout)
+        val parentLayout = findViewById<ConstraintLayout>(R.id.parentLayoutRecordingActivity)
         parentLayout.addView(textView)
 
         val startButton: Button = binding.startButton
