@@ -42,7 +42,7 @@ class RecordingActivity : AppCompatActivity() {
         startButton.setOnClickListener {onStartAttempt(binding) }
 
         val resultButton: Button = binding.resultButton
-        resultButton.setOnClickListener {onResult(binding) }
+        resultButton.setOnClickListener {onResult() }
 
     }
 
@@ -97,7 +97,7 @@ class RecordingActivity : AppCompatActivity() {
 
     }
 
-    private fun onResult(binding: ActivityRecordingBinding) {
+    private fun onResult() {
         val intent = Intent(this, ResultActivity::class.java)
         startActivity(intent)
     }

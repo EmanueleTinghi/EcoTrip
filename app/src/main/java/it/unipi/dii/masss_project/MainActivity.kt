@@ -75,6 +75,8 @@ class MainActivity : AppCompatActivity() {
             val duration = Toast.LENGTH_LONG
 
             val toast = Toast.makeText(this, message, duration)
+
+            toast.show()
         }
 
     }
