@@ -4,18 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
-import it.unipi.dii.masss_project.databinding.ActivityMainBinding
 import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
 
 class RecordingActivity : AppCompatActivity() {
@@ -38,7 +35,7 @@ class RecordingActivity : AppCompatActivity() {
         )
         layoutParams.setMargins(425, 750, 0, 0) // Left, Top, Right, Bottom margins
         textView.layoutParams = layoutParams
-        val parentLayout = findViewById<ConstraintLayout>(R.id.parentLayout)
+        val parentLayout = findViewById<ConstraintLayout>(R.id.parentLayoutRecordingActivity)
         parentLayout.addView(textView)
 
         val startButton: Button = binding.startButton
@@ -68,15 +65,7 @@ class RecordingActivity : AppCompatActivity() {
             /****************           Accelerometer              ****************/
             // Get the accelerometer sensor
             val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-            val accelerometerListener = object : SensorEventListener {
-                override fun onSensorChanged(event: SensorEvent) {
-                    handleSensorChange(event)
-                }
-
-                override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-                    handleAccuracyChange(sensor, accuracy)
-                }
-            }
+            val accelerometerListener = SensorAccelerometer()
             sensorManager.registerListener(accelerometerListener,
                                                 accelerometer,
                                                 SensorManager.SENSOR_DELAY_NORMAL)
@@ -111,30 +100,6 @@ class RecordingActivity : AppCompatActivity() {
     private fun onResult(binding: ActivityRecordingBinding) {
         val intent = Intent(this, ResultActivity::class.java)
         startActivity(intent)
-    }
-
-    private fun handleSensorChange(event: SensorEvent){
-        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            val currentTime = System.currentTimeMillis()
-
-            // Only process one sample per second
-            if (currentTime - lastUpdateAccelerometer > 1000) {
-                lastUpdateAccelerometer = currentTime
-
-                // Get the accelerometer values
-                val x = event.values[0]
-                val y = event.values[1]
-                val z = event.values[2]
-
-                // TODO Do something with this values
-
-                println("Accelerometer data : x:${x} + y:${y} + z:${z}")
-            }
-        }
-    }
-
-    private fun handleAccuracyChange(sensor: Sensor, accuracy: Int){
-
     }
 
 }
