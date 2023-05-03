@@ -2,6 +2,7 @@ package it.unipi.dii.masss_project
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorManager
@@ -19,24 +20,18 @@ class RecordingActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRecordingBinding
     private var lastUpdateAccelerometer: Long = 0
+    private lateinit var username: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val username = intent.getStringExtra("username")
+        username = intent.getStringExtra("username").toString()
 
         binding= DataBindingUtil.setContentView(
             this, R.layout.activity_recording)
 
-        val textView = TextView(this)
-        "Welcome ${username}!".also { textView.text = it }
-        val layoutParams = ConstraintLayout.LayoutParams(
-            ConstraintLayout.LayoutParams.MATCH_PARENT, // Width
-            ConstraintLayout.LayoutParams.MATCH_PARENT // Height
-        )
-        layoutParams.setMargins(425, 750, 0, 0) // Left, Top, Right, Bottom margins
-        textView.layoutParams = layoutParams
-        val parentLayout = findViewById<ConstraintLayout>(R.id.parentLayoutRecordingActivity)
-        parentLayout.addView(textView)
+        val welcomeTextView: TextView = binding.welcomeTextView
+        welcomeTextView.text = "Welcome ${username}!"
+        welcomeTextView.visibility = View.VISIBLE
 
         val startButton: Button = binding.startButton
         startButton.setOnClickListener {onStartAttempt(binding) }
@@ -99,7 +94,17 @@ class RecordingActivity : AppCompatActivity() {
 
     private fun onResult() {
         val intent = Intent(this, ResultActivity::class.java)
+        intent.putExtra("username", username)
         startActivity(intent)
+    }
+
+    override fun onResume(){
+        super.onResume()
+        // todo : ritrovare lo username dell'utente
+        username = intent.getStringExtra("username").toString()
+        val welcomeTextView: TextView = binding.welcomeTextView
+        welcomeTextView.text = "Welcome ${username}!"
+        welcomeTextView.visibility = View.VISIBLE
     }
 
 }
