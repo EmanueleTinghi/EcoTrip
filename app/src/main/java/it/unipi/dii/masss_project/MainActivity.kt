@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         }
         else{
             // Otherwise show error message
-            val message = "Insert username, email and password, please"
+            val message = "Insert email and password, please"
             val duration = Toast.LENGTH_LONG
 
             val toast = Toast.makeText(this, message, duration)
@@ -54,7 +54,6 @@ class MainActivity : AppCompatActivity() {
         val prefs = getPreferences(MODE_PRIVATE)
         val editor = prefs.edit()
 
-        editor.putString("username", binding.inputUsername.text.toString())
         editor.putString("password", binding.inputPassword.text.toString())
         editor.putString("email", binding.inputEmail.text.toString())
         editor.apply()
@@ -65,7 +64,6 @@ class MainActivity : AppCompatActivity() {
 
         // Set the input fields to previous values
         val prefs = getPreferences(MODE_PRIVATE)
-        binding.inputUsername.setText(prefs.getString("username", ""))
         binding.inputPassword.setText(prefs.getString("password", ""))
         binding.inputEmail.setText(prefs.getString("email", ""))
 
