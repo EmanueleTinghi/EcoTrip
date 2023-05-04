@@ -70,6 +70,12 @@ class RecordingActivity : AppCompatActivity() {
                                                 accelerometer,
                                                 SensorManager.SENSOR_DELAY_NORMAL)
 
+            /*****************          Gyroscope                  ****************/
+            //Get the gyroscope sensor
+            val gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
+            val gyroscopeListener = SensorGyroscope()
+            sensorManager.registerListener(gyroscopeListener, gyroscope, SensorManager.SENSOR_DELAY_NORMAL)
+
             /****************           TO-DO              ****************/
 
             // todo: rilevare posizione utente tramite GPS
