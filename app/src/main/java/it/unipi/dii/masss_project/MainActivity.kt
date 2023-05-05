@@ -114,7 +114,6 @@ class MainActivity : AppCompatActivity() {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    //var user = auth.currentUser
                     // go on recordingActivity
                     startRecordingActivity(email)
                 } else {
