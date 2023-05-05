@@ -12,12 +12,16 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,6 +32,9 @@ class MainActivity : AppCompatActivity() {
 
         val button: Button = binding.loginButton
         button.setOnClickListener{onLoginAttempt()}
+
+        // initialize firebase firestore
+        db = FirebaseFirestore.getInstance()
     }
 
     private fun onLoginAttempt() {
@@ -140,7 +147,19 @@ class MainActivity : AppCompatActivity() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    //var user = auth.currentUser
+                    // generate a db associated with the new registered user
+                    val user: FirebaseUser? = auth.currentUser
+                    val userId: String? = user?.uid
+                    val userRef: DocumentReference = db.collection("users").document(userId!!)
+                    val parts = email.split("@")
+                    val username: String = parts[0]
+                    val userData = hashMapOf(
+                        "username" to username,
+                        "email" to email,
+                        "password" to password
+                    )
+                    userRef.set(userData)
+
                     // go on recordingActivity
                     startRecordingActivity(email)
                 } else {
