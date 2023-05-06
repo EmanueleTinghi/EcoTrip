@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -16,9 +18,11 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class RecordingActivity : AppCompatActivity() {
 
@@ -28,10 +32,10 @@ class RecordingActivity : AppCompatActivity() {
 
     private var lastUpdateAccelerometer: Long = 0
 
-    companion object {
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 99
-    }
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var startLat: Double = 0.0
+    private var startLong: Double = 0.0
+    private var stopLat: Double = 0.0
+    private var stopLong: Double = 0.0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,7 +60,8 @@ class RecordingActivity : AppCompatActivity() {
         val resultButton: Button = binding.resultButton
         resultButton.setOnClickListener {onResult() }
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        // Check if the user has granted location permissions at runtime
+        checkLocationPermission()
 
     }
 
@@ -85,23 +90,12 @@ class RecordingActivity : AppCompatActivity() {
                                                 SensorManager.SENSOR_DELAY_NORMAL)
 
             /****************           GPS              ****************/
-            // Check if the user has granted location permissions at runtime
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                        || ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // Request location permission
-                ActivityCompat.requestPermissions(this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
-            }
-            else {
-                // Get the last location
-                getLastLocation()
-            }
+            // retrieve user current location - start point
+            getStartLocation()
 
             /****************           TO-DO              ****************/
             // todo: usare classificatore per rilevare mezzo di trasporto
+
         } else {
             "Start".also { binding.startButton.text = it }
 
@@ -112,6 +106,14 @@ class RecordingActivity : AppCompatActivity() {
             val duration = Toast.LENGTH_LONG
             val toast = Toast.makeText(this, message, duration)
             toast.show()
+
+            // retrieve user current location - end point
+            getStopLocation()
+
+            // calculate distance between start and end points
+            val distance = calculateDistance()
+            println("distance: $distance")
+
 
             // todo: collezionare risultati del transportation mode
 
@@ -131,37 +133,100 @@ class RecordingActivity : AppCompatActivity() {
 
     override fun onResume(){
         super.onResume()
-        // todo : ritrovare lo username dell'utente
+
+        // retrieve username from intent
         username = intent.getStringExtra("username").toString()
         val welcomeTextView: TextView = binding.welcomeTextView
         "Welcome ${username}!".also { welcomeTextView.text = it }
         welcomeTextView.visibility = View.VISIBLE
     }
 
-    private fun getLastLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            return
-        }
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                if (location!= null) {
-                    // use the user current location
-                    val latitude = location.latitude
-                    val longitude = location.longitude
+    private fun getStartLocation() {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val locationListener = object : LocationListener {
+            override fun onLocationChanged(location: Location) {
+                val latitude = location.latitude
+                val longitude = location.longitude
 
-                    val message = "Latitude: $latitude, Longitude: $longitude"
-                    val duration = Toast.LENGTH_LONG
-                    val toast = Toast.makeText(this, message, duration)
-                    toast.show()
+                println("start")
+                startLat = latitude
+                startLong = longitude
+                println("start location: latitude $startLat, longitude $startLong")
 
-                } else {
-                    // location is null
-                    val message = "Unable to retrieve location"
-                    val duration = Toast.LENGTH_LONG
-                    val toast = Toast.makeText(this, message, duration)
-                    toast.show()
-                }
+                // Stop receiving location updates
+                locationManager.removeUpdates(this)
             }
+            override fun onProviderDisabled(provider: String) {}
+            override fun onProviderEnabled(provider: String) {}
+            @Deprecated("Deprecated in Java")
+            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+        }
+        checkLocationPermission()
+
+        // Register the listener to receive location updates
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 0f, locationListener)
+        // Stop receiving location updates
+        locationManager.removeUpdates(locationListener)
+    }
+
+    private fun getStopLocation() {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val locationListener = object : LocationListener {
+            override fun onLocationChanged(location: Location) {
+                val latitude = location.latitude
+                val longitude = location.longitude
+
+                println("stop")
+                stopLat = latitude
+                stopLong = longitude
+                println("stop location: latitude $stopLat, longitude $stopLong")
+
+                // Stop receiving location updates
+                locationManager.removeUpdates(this)
+            }
+            override fun onProviderDisabled(provider: String) {}
+            override fun onProviderEnabled(provider: String) {}
+            @Deprecated("Deprecated in Java")
+            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+        }
+        checkLocationPermission()
+
+        // Register the listener to receive location updates
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 0f, locationListener)
+        // Stop receiving location updates
+        locationManager.removeUpdates(locationListener)
+    }
+
+    private fun checkLocationPermission() {
+        // Check if the user has granted location permissions at runtime
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+            || ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Request location permission
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION), 0)
+        }
+    }
+
+    private fun calculateDistance(): Double {
+        println("calculateDistance")
+        println("start location: latitude $startLat, longitude $startLong")
+        println("stop location: latitude $stopLat, longitude $stopLong")
+
+        val earthRadius = 6371 // Radius of the earth in km
+
+        val dLat = Math.toRadians(stopLat - startLat)
+        val dLng = Math.toRadians(stopLong - startLong)
+
+        val a = sin(dLat / 2) * sin(dLat / 2) +
+                cos(Math.toRadians(startLat)) * cos(Math.toRadians(stopLat)) *
+                sin(dLng / 2) * sin(dLng / 2)
+
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        return earthRadius * c // Distance in km
     }
 
 }
