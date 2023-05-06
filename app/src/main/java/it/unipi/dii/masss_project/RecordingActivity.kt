@@ -19,6 +19,8 @@ class RecordingActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRecordingBinding
     private var lastUpdateAccelerometer: Long = 0
+    private var gyroscope: SensorGyroscope? = null
+    private var accelerometer: SensorAccelerometer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,17 +66,18 @@ class RecordingActivity : AppCompatActivity() {
 
             /****************           Accelerometer              ****************/
             // Get the accelerometer sensor
-            val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+            /*val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
             val accelerometerListener = SensorAccelerometer()
             sensorManager.registerListener(accelerometerListener,
                                                 accelerometer,
-                                                SensorManager.SENSOR_DELAY_NORMAL)
+                                                SensorManager.SENSOR_DELAY_NORMAL)*/
+            accelerometer = SensorAccelerometer(this)
+            accelerometer!!.start()
 
             /*****************          Gyroscope                  ****************/
             //Get the gyroscope sensor
-            val gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
-            val gyroscopeListener = SensorGyroscope()
-            sensorManager.registerListener(gyroscopeListener, gyroscope, SensorManager.SENSOR_DELAY_NORMAL)
+            gyroscope = SensorGyroscope(this)
+            gyroscope!!.start()
 
             /****************           TO-DO              ****************/
 
@@ -83,6 +86,8 @@ class RecordingActivity : AppCompatActivity() {
             // todo: se viene rilevato vehicle -> usare classificatore
         } else {
             binding.startButton.text = "Start"
+            gyroscope!!.stop()
+            accelerometer!!.stop()
 
             val resultButton: Button = binding.resultButton
             resultButton.visibility = View.VISIBLE

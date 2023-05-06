@@ -5,97 +5,82 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.util.Log
 
-class SensorGyroscope() : SensorEventListener {
-    private val gyroscopeSensor: Sensor? = null
-    private val orientation: FloatArray = FloatArray(3)
-    private val angularVelocity: FloatArray = FloatArray(3)
-    private val acceleration: FloatArray = FloatArray(3)
-    private val isRunning: Boolean = false
-    private val samplingInterval : Long = 1000 // 1 second
-    private var lastUpdateAccelerometer: Long = 0
-    fun getOrientation(): FloatArray{
-        return orientation.clone();
+class SensorGyroscope(context: Context) : SensorEventListener {
+
+    // Define variables to store the sensor manager and the gyroscope sensor
+    private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    private val gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
+
+    // Implement the onSensorChanged method to handle gyroscope sensor events
+    override fun onSensorChanged(event: SensorEvent) {
+        // Retrieve gyroscope data from the SensorEvent object
+        val x = event.values[0]
+        val y = event.values[1]
+        val z = event.values[2]
+
+        // Do something with the gyroscope data
+        // For example, log the gyroscope data to the console
+        Log.d("Gyroscope: ", "x=$x y=$y z=$z")
     }
 
-    fun getAngularVelocity(): FloatArray{
-        return angularVelocity.clone();
-    }
-
-    fun getAcceleration(): FloatArray{
-        return acceleration.clone()
-    }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-        //TODO test
-        if (event != null && event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
-            val currentTime = System.currentTimeMillis()
-
-            // Only process one sample per second
-            if (currentTime - lastUpdateAccelerometer > this.samplingInterval) {
-                lastUpdateAccelerometer = currentTime
-                for (element in event.values) {
-                    println("Gyroscope data: $element")
-                }
-            }
-        }
-    }
-
+    // Implement the onAccuracyChanged method to handle gyroscope sensor accuracy changes
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        if (sensor != null) {
-            if (accuracy == SensorManager.SENSOR_STATUS_ACCURACY_HIGH) {
-                // Sensor data is highly accurate
-                println("Accuracy high!")
-            } else if (accuracy == SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM) {
-                // Sensor data is moderately accurate
-                println("Accuracy moderately accurate!")
-            } else if (accuracy == SensorManager.SENSOR_STATUS_ACCURACY_LOW) {
-                // Sensor data is less accurate
-                println("Accuracy low!")
+        // Do something when the gyroscope sensor accuracy changes
+    }
 
-            }
-        }
+    // Register the gyroscope sensor listener when the GyroscopeManager object is created
+    init {
+        sensorManager.registerListener(this, gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    // Register the gyroscope sensor listener when the GyroscopeManager object is created
+    fun start() {
+        sensorManager.registerListener(this, gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    // Unregister the gyroscope sensor listener when the GyroscopeManager object is destroyed
+    fun stop() {
+        sensorManager.unregisterListener(this)
     }
 }
 
-class SensorAccelerometer : SensorEventListener {
+class SensorAccelerometer(context: Context) : SensorEventListener {
 
-    private val samplingInterval : Long = 1000 // 1 second
-    private var lastUpdateAccelerometer: Long = 0
+    // Define variables to store the sensor manager and the gyroscope sensor
+    private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    private val accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event?.sensor?.type == Sensor.TYPE_ACCELEROMETER) {
-            val currentTime = System.currentTimeMillis()
+    // Implement the onSensorChanged method to handle gyroscope sensor events
+    override fun onSensorChanged(event: SensorEvent) {
+        // Retrieve gyroscope data from the SensorEvent object
+        val x = event.values[0]
+        val y = event.values[1]
+        val z = event.values[2]
 
-            // Only process one sample per second
-            if (currentTime - lastUpdateAccelerometer > this.samplingInterval) {
-                lastUpdateAccelerometer = currentTime
-
-                // Get the accelerometer values
-                val x = event.values[0]
-                val y = event.values[1]
-                val z = event.values[2]
-
-                // TODO Do something with this values
-                println("Accelerometer data : x:${x} + y:${y} + z:${z}")
-            }
-        }
+        // Do something with the gyroscope data
+        // For example, log the gyroscope data to the console
+        Log.d("Accelerometer: ", "x=$x y=$y z=$z")
     }
 
+    // Implement the onAccuracyChanged method to handle gyroscope sensor accuracy changes
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        // TODO -- What should I  do when accuracy decreases/increases?
-        if (sensor != null) {
-            if (accuracy == SensorManager.SENSOR_STATUS_ACCURACY_HIGH) {
-                // Sensor data is highly accurate
-                println("Accuracy high!")
-            } else if (accuracy == SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM) {
-                // Sensor data is moderately accurate
-                println("Accuracy moderately accurate!")
-            } else if (accuracy == SensorManager.SENSOR_STATUS_ACCURACY_LOW) {
-                // Sensor data is less accurate
-                println("Accuracy low!")
+        // Do something when the gyroscope sensor accuracy changes
+    }
 
-            }
-        }
+    // Register the gyroscope sensor listener when the GyroscopeManager object is created
+    init {
+        sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    // Register the gyroscope sensor listener when the GyroscopeManager object is created
+    fun start() {
+        sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    // Unregister the gyroscope sensor listener when the GyroscopeManager object is destroyed
+    fun stop() {
+        sensorManager.unregisterListener(this)
     }
 }
