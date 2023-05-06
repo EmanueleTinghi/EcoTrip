@@ -1,56 +1,75 @@
 package it.unipi.dii.masss_project
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
+import android.content.pm.PackageManager
 import android.hardware.Sensor
-import android.hardware.SensorEvent
 import android.hardware.SensorManager
+import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
 
 class RecordingActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRecordingBinding
-    private var lastUpdateAccelerometer: Long = 0
+
     private lateinit var username: String
+
+    private var lastUpdateAccelerometer: Long = 0
+
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 99
+    }
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // retrieve username from intent
         username = intent.getStringExtra("username").toString()
 
         binding= DataBindingUtil.setContentView(
             this, R.layout.activity_recording)
 
+        // add welcome text view
         val welcomeTextView: TextView = binding.welcomeTextView
-        welcomeTextView.text = "Welcome ${username}!"
+        "Welcome ${username}!".also { welcomeTextView.text = it }
         welcomeTextView.visibility = View.VISIBLE
 
+        // register listener for startButton
         val startButton: Button = binding.startButton
         startButton.setOnClickListener {onStartAttempt(binding) }
 
+        // register listener for resultButton
         val resultButton: Button = binding.resultButton
         resultButton.setOnClickListener {onResult() }
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
     }
 
     private fun onStartAttempt(binding: ActivityRecordingBinding) {
         if (binding.startButton.text == "Start") {
-            binding.startButton.text = "Stop"
+            "Stop".also { binding.startButton.text = it }
 
+            // hide resultButton when user starts a trip
             val resultButton: Button = binding.resultButton
             resultButton.visibility = View.INVISIBLE
 
             val message = "Start transportation mode detection"
             val duration = Toast.LENGTH_LONG
-
             val toast = Toast.makeText(this, message, duration)
             toast.show()
 
@@ -65,20 +84,32 @@ class RecordingActivity : AppCompatActivity() {
                                                 accelerometer,
                                                 SensorManager.SENSOR_DELAY_NORMAL)
 
-            /****************           TO-DO              ****************/
+            /****************           GPS              ****************/
+            // Check if the user has granted location permissions at runtime
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        || ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // Request location permission
+                ActivityCompat.requestPermissions(this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+            }
+            else {
+                // Get the last location
+                getLastLocation()
+            }
 
-            // todo: rilevare posizione utente tramite GPS
-            // todo: fare una prima classificazione con l'activity recognition system api
-            // todo: se viene rilevato vehicle -> usare classificatore
+            /****************           TO-DO              ****************/
+            // todo: usare classificatore per rilevare mezzo di trasporto
         } else {
-            binding.startButton.text = "Start"
+            "Start".also { binding.startButton.text = it }
 
             val resultButton: Button = binding.resultButton
             resultButton.visibility = View.VISIBLE
 
             val message = "Stop transportation mode detection"
             val duration = Toast.LENGTH_LONG
-
             val toast = Toast.makeText(this, message, duration)
             toast.show()
 
@@ -103,8 +134,34 @@ class RecordingActivity : AppCompatActivity() {
         // todo : ritrovare lo username dell'utente
         username = intent.getStringExtra("username").toString()
         val welcomeTextView: TextView = binding.welcomeTextView
-        welcomeTextView.text = "Welcome ${username}!"
+        "Welcome ${username}!".also { welcomeTextView.text = it }
         welcomeTextView.visibility = View.VISIBLE
+    }
+
+    private fun getLastLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            return
+        }
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                if (location!= null) {
+                    // use the user current location
+                    val latitude = location.latitude
+                    val longitude = location.longitude
+
+                    val message = "Latitude: $latitude, Longitude: $longitude"
+                    val duration = Toast.LENGTH_LONG
+                    val toast = Toast.makeText(this, message, duration)
+                    toast.show()
+
+                } else {
+                    // location is null
+                    val message = "Unable to retrieve location"
+                    val duration = Toast.LENGTH_LONG
+                    val toast = Toast.makeText(this, message, duration)
+                    toast.show()
+                }
+            }
     }
 
 }

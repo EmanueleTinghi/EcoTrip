@@ -20,13 +20,16 @@ class ResultActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(
             this, R.layout.activity_result)
 
+        // retrieve username from intent
         username = intent.getStringExtra("username").toString()
 
+        // add text view to see the user result
         // todo : aggiungere il testo del risutato ottenuto
         val resultTextView: TextView = binding.resultTextView
         resultTextView.text = ""
         resultTextView.visibility = View.VISIBLE
 
+        // register listener for backButton
         val backButton = binding.backButton
         backButton.setOnClickListener { onBackPressed(binding) }
     }

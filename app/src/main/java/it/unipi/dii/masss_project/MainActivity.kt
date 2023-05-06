@@ -64,9 +64,7 @@ class MainActivity : AppCompatActivity() {
                         // handle error
                         val message = "Error in checking user existence"
                         val duration = Toast.LENGTH_LONG
-
                         val toast = Toast.makeText(this, message, duration)
-
                         toast.show()
 
                         val errorTextView: TextView = binding.errorTextView
@@ -80,9 +78,7 @@ class MainActivity : AppCompatActivity() {
             // Otherwise show error message
             val message = "Insert email and password, please"
             val duration = Toast.LENGTH_LONG
-
             val toast = Toast.makeText(this, message, duration)
-
             toast.show()
         }
 
@@ -120,7 +116,6 @@ class MainActivity : AppCompatActivity() {
                     // Otherwise show error message
                     val message = "Authentication failed"
                     val duration = Toast.LENGTH_LONG
-
                     val toast = Toast.makeText(this, message, duration)
                     toast.show()
 
@@ -165,7 +160,6 @@ class MainActivity : AppCompatActivity() {
                     // Otherwise show error message
                     val message = "Registration failed"
                     val duration = Toast.LENGTH_LONG
-
                     val toast = Toast.makeText(this, message, duration)
                     toast.show()
 
