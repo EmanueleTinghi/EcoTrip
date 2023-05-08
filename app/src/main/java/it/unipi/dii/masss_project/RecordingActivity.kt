@@ -19,7 +19,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
-import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -35,8 +34,8 @@ class RecordingActivity : AppCompatActivity() {
     private var startPoint: Location = Location("Start point")
     private var endPoint: Location = Location("End point")
 
-    private var distance: Float = 0.0F
-
+    private val distances = mutableListOf<Float>()
+    private var finalDistance = 0.0f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,7 +90,9 @@ class RecordingActivity : AppCompatActivity() {
 
             /****************           GPS              ****************/
             // retrieve user current location - start point
-            getLocation(true)
+            val progress = StringBuilder()
+            progress.append("Start")
+            getLocation(progress)
 
             /****************           TO-DO              ****************/
             // todo: usare classificatore per rilevare mezzo di trasporto
@@ -109,7 +110,9 @@ class RecordingActivity : AppCompatActivity() {
 
             // retrieve user current location - end point
             // and calculate distance between start and end points
-            getLocation(false)
+            val progress = StringBuilder()
+            progress.append("Stop")
+            getLocation(progress)
 
             // todo: collezionare risultati del transportation mode
 
@@ -137,31 +140,63 @@ class RecordingActivity : AppCompatActivity() {
         welcomeTextView.visibility = View.VISIBLE
     }
 
-    private fun getLocation(start: Boolean) {
+    private fun getLocation(progress: StringBuilder) {
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val locationListener = object : LocationListener {
             @Deprecated("Deprecated in Java")
             override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+
             override fun onLocationChanged(location: Location) {
+
+                // get coordinates
                 val latitude = location.latitude
                 val longitude = location.longitude
-                if (start){
-                    startPoint.latitude = latitude
-                    startPoint.longitude = longitude
-                    println("START LOCATION: latitude ${startPoint.latitude}, longitude ${startPoint.longitude}")
-                } else {
-                    endPoint.latitude = latitude
-                    endPoint.longitude = longitude
-                    println("STOP LOCATION: latitude ${endPoint.latitude}, longitude ${endPoint.longitude}")
 
-                    // calculate distance between start and end points
-                    distance = (startPoint.distanceTo(endPoint) / 1000.0).toFloat()
-                    println("DISTANCE TRAVELED: $distance km")
+                when (progress.toString()) {
+                    "Start" -> {
+                        // start point
+                        startPoint.latitude = latitude
+                        startPoint.longitude = longitude
+                        println("START LOCATION: latitude ${startPoint.latitude}, longitude ${startPoint.longitude}")
+                        progress.append("Intermediate")
 
+                    }
+                    "Stop" -> {
+
+                        // stop point
+                        endPoint.latitude = latitude
+                        endPoint.longitude = longitude
+                        println("STOP LOCATION: latitude ${endPoint.latitude}, longitude ${endPoint.longitude}")
+
+                        // calculate distance between intermediate and end point
+                        val distance = (startPoint.distanceTo(endPoint) / 1000.0).toFloat()
+                        println("DISTANCE: $distance km")
+                        distances.add(distance)
+
+                        // calculate final distance
+                        finalDistance = distances.sum()
+                        println("FINAL DISTANCE: $finalDistance km")
+
+                        // Stop receiving location updates
+                        locationManager.removeUpdates(this)
+
+                    }
+                    else -> {
+                        // intermediate point
+                        endPoint.latitude = latitude
+                        endPoint.longitude = longitude
+                        println("INTERMEDIATE LOCATION: latitude ${endPoint.latitude}, longitude ${endPoint.longitude}")
+
+                        // calculate distance between start and intermediate point
+                        val distance = (startPoint.distanceTo(endPoint) / 1000.0).toFloat()
+                        println("DISTANCE: $distance km")
+                        distances.add(distance)
+
+                        // set new start point
+                        startPoint.latitude = latitude
+                        startPoint.longitude = longitude
+                    }
                 }
-                // Stop receiving location updates
-                locationManager.removeUpdates(this)
-
             }
             override fun onProviderEnabled(provider: String) {}
             override fun onProviderDisabled(provider: String) {}
@@ -170,7 +205,7 @@ class RecordingActivity : AppCompatActivity() {
         checkLocationPermission()
 
         // Register the listener to receive location updates
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, locationListener)
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 5.0f, locationListener)
     }
 
     private fun checkLocationPermission() {
