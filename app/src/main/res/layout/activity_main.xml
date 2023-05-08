@@ -25,7 +25,7 @@
             android:layout_height="19dp"
             android:layout_marginStart="52dp"
             android:layout_marginTop="196dp"
-            android:text="Insert email:"
+            android:text="@string/insert_email"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -45,7 +45,7 @@
                 android:id="@+id/inputEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="email" />
+                android:hint="@string/email" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
@@ -85,7 +85,6 @@
             android:layout_marginStart="55dp"
             android:layout_marginTop="412dp"
             android:layout_marginEnd="49dp"
-            android:text="TextView"
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

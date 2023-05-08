@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.databinding.DataBindingUtil
-import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
 import it.unipi.dii.masss_project.databinding.ActivityResultBinding
 
 class ResultActivity : AppCompatActivity() {
@@ -26,7 +25,7 @@ class ResultActivity : AppCompatActivity() {
         // add text view to see the user result
         // todo : aggiungere il testo del risutato ottenuto
         val resultTextView: TextView = binding.resultTextView
-        resultTextView.text = ""
+        "$username, this are your results:\n".also { resultTextView.text = it }
         resultTextView.visibility = View.VISIBLE
 
         // register listener for backButton

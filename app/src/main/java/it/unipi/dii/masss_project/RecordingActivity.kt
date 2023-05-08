@@ -19,9 +19,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
 
 class RecordingActivity : AppCompatActivity() {
 
