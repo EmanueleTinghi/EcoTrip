@@ -32,12 +32,10 @@ class RecordingActivity : AppCompatActivity() {
 
     private var lastUpdateAccelerometer: Long = 0
 
-    private var startLat: Double = 0.0
-    private var startLong: Double = 0.0
-    private var stopLat: Double = 0.0
-    private var stopLong: Double = 0.0
+    private var startPoint: Location = Location("Start point")
+    private var endPoint: Location = Location("End point")
 
-    private var distance: Double = 0.0
+    private var distance: Float = 0.0F
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -148,22 +146,18 @@ class RecordingActivity : AppCompatActivity() {
                 val latitude = location.latitude
                 val longitude = location.longitude
                 if (start){
-                    startLat = latitude
-                    startLong = longitude
-                    println("START LOCATION: latitude $startLat, longitude $startLong")
+                    startPoint.latitude = latitude
+                    startPoint.longitude = longitude
+                    println("START LOCATION: latitude ${startPoint.latitude}, longitude ${startPoint.longitude}")
                 } else {
-                    stopLat = latitude
-                    stopLong = longitude
-                    println("STOP LOCATION: latitude $stopLat, longitude $stopLong")
+                    endPoint.latitude = latitude
+                    endPoint.longitude = longitude
+                    println("STOP LOCATION: latitude ${endPoint.latitude}, longitude ${endPoint.longitude}")
 
                     // calculate distance between start and end points
-                    distance = calculateDistance()
+                    distance = (startPoint.distanceTo(endPoint) / 1000.0).toFloat()
                     println("DISTANCE TRAVELED: $distance km")
 
-                    startLat = 0.0
-                    startLong = 0.0
-                    stopLat = 0.0
-                    stopLong = 0.0
                 }
                 // Stop receiving location updates
                 locationManager.removeUpdates(this)
@@ -190,22 +184,6 @@ class RecordingActivity : AppCompatActivity() {
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION), 0)
         }
-    }
-
-    private fun calculateDistance(): Double {
-
-        val earthRadius = 6371 // Radius of the earth in km
-
-        val dLat = Math.toRadians(stopLat - startLat)
-        val dLng = Math.toRadians(stopLong - startLong)
-
-        val a = sin(dLat / 2) * sin(dLat / 2) +
-                cos(Math.toRadians(startLat)) * cos(Math.toRadians(stopLat)) *
-                sin(dLng / 2) * sin(dLng / 2)
-
-        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-        return earthRadius * c // Distance in km
     }
 
 }
