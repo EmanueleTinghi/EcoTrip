@@ -91,7 +91,7 @@ class RecordingActivity : AppCompatActivity() {
 
             /****************           GPS              ****************/
             // retrieve user current location - start point
-            getStartLocation()
+            getLocation(true)
 
             /****************           TO-DO              ****************/
             // todo: usare classificatore per rilevare mezzo di trasporto
@@ -108,12 +108,8 @@ class RecordingActivity : AppCompatActivity() {
             toast.show()
 
             // retrieve user current location - end point
-            getStopLocation()
-
-            // calculate distance between start and end points
-            val distance = calculateDistance()
-            println("distance: $distance")
-
+            // and calculate distance between start and end points
+            getLocation(false)
 
             // todo: collezionare risultati del transportation mode
 
@@ -141,60 +137,45 @@ class RecordingActivity : AppCompatActivity() {
         welcomeTextView.visibility = View.VISIBLE
     }
 
-    private fun getStartLocation() {
+    private fun getLocation(start: Boolean) {
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val locationListener = object : LocationListener {
+            @Deprecated("Deprecated in Java")
+            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
             override fun onLocationChanged(location: Location) {
                 val latitude = location.latitude
                 val longitude = location.longitude
+                if (start){
+                    println("start")
+                    startLat = latitude
+                    startLong = longitude
+                    println("start location: latitude $startLat, longitude $startLong")
+                } else {
+                    println("stop")
+                    stopLat = latitude
+                    stopLong = longitude
+                    println("stop location: latitude $stopLat, longitude $stopLong")
 
-                println("start")
-                startLat = latitude
-                startLong = longitude
-                println("start location: latitude $startLat, longitude $startLong")
+                    // calculate distance between start and end points
+                    val distance = calculateDistance()
+                    println("distance: $distance")
 
+                    startLat = 0.0
+                    startLong = 0.0
+                    stopLat = 0.0
+                    stopLong = 0.0
+                }
                 // Stop receiving location updates
                 locationManager.removeUpdates(this)
+
             }
-            override fun onProviderDisabled(provider: String) {}
             override fun onProviderEnabled(provider: String) {}
-            @Deprecated("Deprecated in Java")
-            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
+            override fun onProviderDisabled(provider: String) {}
+
         }
         checkLocationPermission()
-
         // Register the listener to receive location updates
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 0f, locationListener)
-        // Stop receiving location updates
-        locationManager.removeUpdates(locationListener)
-    }
-
-    private fun getStopLocation() {
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val locationListener = object : LocationListener {
-            override fun onLocationChanged(location: Location) {
-                val latitude = location.latitude
-                val longitude = location.longitude
-
-                println("stop")
-                stopLat = latitude
-                stopLong = longitude
-                println("stop location: latitude $stopLat, longitude $stopLong")
-
-                // Stop receiving location updates
-                locationManager.removeUpdates(this)
-            }
-            override fun onProviderDisabled(provider: String) {}
-            override fun onProviderEnabled(provider: String) {}
-            @Deprecated("Deprecated in Java")
-            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
-        }
-        checkLocationPermission()
-
-        // Register the listener to receive location updates
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 0f, locationListener)
-        // Stop receiving location updates
-        locationManager.removeUpdates(locationListener)
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, locationListener)
     }
 
     private fun checkLocationPermission() {
