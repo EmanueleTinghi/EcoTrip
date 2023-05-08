@@ -8,7 +8,6 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
@@ -30,56 +29,71 @@ class MainActivity : AppCompatActivity() {
             this, R.layout.activity_main)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
+        // initialize firebase authentication
+        auth = FirebaseAuth.getInstance()
+        // initialize firebase firestore
+        db = FirebaseFirestore.getInstance()
+
+        // add listener for loginButton
         val button: Button = binding.loginButton
         button.setOnClickListener{onLoginAttempt()}
 
-        // initialize firebase firestore
-        db = FirebaseFirestore.getInstance()
     }
 
     private fun onLoginAttempt() {
-        val email: String = binding.inputEmail.text.toString()
-        val password: String = binding.inputPassword.text.toString()
+        if (binding.loginButton.text == "Login") {
+            // retrieve user email and password
+            val email: String = binding.inputEmail.text.toString()
+            val password: String = binding.inputPassword.text.toString()
 
-        if(password.isNotEmpty() && email.isNotEmpty()) {
+            if(password.isNotEmpty() && email.isNotEmpty()) {
 
-            auth = FirebaseAuth.getInstance()
+                // check if user exists
+                auth.fetchSignInMethodsForEmail(email)
+                    .addOnCompleteListener(this) { task ->
+                        if (task.isSuccessful) {
+                            val result = task.result?.signInMethods
+                            if (result?.contains(EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD) == true) {
+                                // user exists
+                                // handle login flow
+                                loginUser(email, password)
 
-            // check if user exists
-            auth.fetchSignInMethodsForEmail(email)
-                .addOnCompleteListener(this) { task ->
-                    if (task.isSuccessful) {
-                        val result = task.result?.signInMethods
-                        if (result?.contains(EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD) == true) {
-                            // user exists
-                            // handle login flow
-                            loginUser(email, password)
-
+                            } else {
+                                // user doesn't exist
+                                // handle registration flow
+                                registerUser(email, password)
+                            }
                         } else {
-                            // user doesn't exist
-                            // handle registration flow
-                            registerUser(email, password)
-                        }
-                    } else {
-                        // handle error
-                        val message = "Error in checking user existence"
-                        val duration = Toast.LENGTH_LONG
-                        val toast = Toast.makeText(this, message, duration)
-                        toast.show()
+                            // handle error
+                            val message = "Error in checking user existence"
+                            val duration = Toast.LENGTH_LONG
+                            val toast = Toast.makeText(this, message, duration)
+                            toast.show()
 
-                        val errorTextView: TextView = binding.errorTextView
-                        errorTextView.text = "${task.exception?.message}"
-                        errorTextView.setTextColor(Color.RED)
-                        errorTextView.visibility = View.VISIBLE
+                            val errorTextView: TextView = binding.errorTextView
+                            errorTextView.text = "${task.exception?.message}"
+                            errorTextView.setTextColor(Color.RED)
+                            errorTextView.visibility = View.VISIBLE
+                        }
                     }
-                }
-        }
-        else{
-            // Otherwise show error message
-            val message = "Insert email and password, please"
-            val duration = Toast.LENGTH_LONG
-            val toast = Toast.makeText(this, message, duration)
-            toast.show()
+            }
+            else{
+                // Otherwise show error message
+                val message = "Insert email and password, please"
+                val duration = Toast.LENGTH_LONG
+                val toast = Toast.makeText(this, message, duration)
+                toast.show()
+            }
+        } else {
+            // user logout
+            auth.signOut()
+
+            // clear input text editor
+            binding.inputEmail.setText("")
+            binding.inputPassword.setText("")
+            binding.inputEmail.requestFocus()
+
+            "Login".also { binding.loginButton.text = it }
         }
 
     }
@@ -104,6 +118,21 @@ class MainActivity : AppCompatActivity() {
         binding.inputPassword.setText(prefs.getString("password", ""))
         binding.inputEmail.setText(prefs.getString("email", ""))
 
+        if(auth.currentUser != null) {
+            // the user is logged in - view logout button
+            "Logout".also { binding.loginButton.text = it }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // clear input text editor
+        binding.inputEmail.setText("")
+        binding.inputPassword.setText("")
+
+        // user logout
+        auth.signOut()
     }
 
     private fun loginUser(email: String, password: String) {

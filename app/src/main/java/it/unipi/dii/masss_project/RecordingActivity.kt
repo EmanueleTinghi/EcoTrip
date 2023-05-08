@@ -54,11 +54,11 @@ class RecordingActivity : AppCompatActivity() {
         "Welcome ${username}!".also { welcomeTextView.text = it }
         welcomeTextView.visibility = View.VISIBLE
 
-        // register listener for startButton
+        // add listener for startButton
         val startButton: Button = binding.startButton
         startButton.setOnClickListener {onStartAttempt(binding) }
 
-        // register listener for resultButton
+        // add listener for resultButton
         val resultButton: Button = binding.resultButton
         resultButton.setOnClickListener {onResult() }
 
@@ -174,6 +174,7 @@ class RecordingActivity : AppCompatActivity() {
 
         }
         checkLocationPermission()
+
         // Register the listener to receive location updates
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, locationListener)
     }
