@@ -37,6 +37,8 @@ class RecordingActivity : AppCompatActivity() {
     private var stopLat: Double = 0.0
     private var stopLong: Double = 0.0
 
+    private var distance: Double = 0.0
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -146,19 +148,17 @@ class RecordingActivity : AppCompatActivity() {
                 val latitude = location.latitude
                 val longitude = location.longitude
                 if (start){
-                    println("start")
                     startLat = latitude
                     startLong = longitude
-                    println("start location: latitude $startLat, longitude $startLong")
+                    println("START LOCATION: latitude $startLat, longitude $startLong")
                 } else {
-                    println("stop")
                     stopLat = latitude
                     stopLong = longitude
-                    println("stop location: latitude $stopLat, longitude $stopLong")
+                    println("STOP LOCATION: latitude $stopLat, longitude $stopLong")
 
                     // calculate distance between start and end points
-                    val distance = calculateDistance()
-                    println("distance: $distance")
+                    distance = calculateDistance()
+                    println("DISTANCE TRAVELED: $distance km")
 
                     startLat = 0.0
                     startLong = 0.0
@@ -192,9 +192,6 @@ class RecordingActivity : AppCompatActivity() {
     }
 
     private fun calculateDistance(): Double {
-        println("calculateDistance")
-        println("start location: latitude $startLat, longitude $startLong")
-        println("stop location: latitude $stopLat, longitude $stopLong")
 
         val earthRadius = 6371 // Radius of the earth in km
 
