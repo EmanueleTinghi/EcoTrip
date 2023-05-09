@@ -10,9 +10,8 @@
     <color name="light_green">#c5edac</color>
     <color name="blue">#3F51B5</color>
     <color name="yellow_green">#ADFF2F</color>
-    <color name="blue_green">#75de40</color>
+    <color name="green">#75de40</color>
     <color name="red">#C21C10</color>
-
     <color name="primary">#245501</color>
     <color name="secondary">#538d22</color>
     <color name="tertiary">#73a942</color>
