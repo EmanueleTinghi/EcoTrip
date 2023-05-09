@@ -24,6 +24,7 @@ class RecordingActivity : AppCompatActivity() {
     private var gyroscope: SensorGyroscope? = null
     private var accelerometer: SensorAccelerometer? = null
     private var microphone: SensorMicrophone? = null
+    private val sensorManager: SensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,18 +70,18 @@ class RecordingActivity : AppCompatActivity() {
 
             /********************          Accelerometer          ********************/
             //Initialize the accelerometer sensor
-            accelerometer = SensorAccelerometer(this)
+            accelerometer = SensorAccelerometer(sensorManager)
             accelerometer!!.start()
 
             /********************          Gyroscope          ********************/
             //Initialize the gyroscope sensor
-            gyroscope = SensorGyroscope(this)
+            gyroscope = SensorGyroscope(sensorManager)
             gyroscope!!.start()
 
             /********************          Microphone          ********************/
             //Initialize the gyroscope sensor
             val activity = activity
-            microphone = SensorMicrophone(this, activity)
+            microphone = SensorMicrophone(this, activity, sensorManager)
 
             microphone!!.start()
 

@@ -13,10 +13,8 @@ import android.os.Environment
 import android.util.Log
 import androidx.core.app.ActivityCompat
 
-class SensorGyroscope(context: Context) : SensorEventListener {
+class SensorGyroscope(private val sensorManager: SensorManager) : SensorEventListener {
 
-    // Define variables to store the sensor manager and the gyroscope sensor
-    private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
 
     // Implement the onSensorChanged method to handle gyroscope sensor events
@@ -52,10 +50,9 @@ class SensorGyroscope(context: Context) : SensorEventListener {
     }
 }
 
-class SensorAccelerometer(context: Context) : SensorEventListener {
+class SensorAccelerometer(private val sensorManager: SensorManager) : SensorEventListener {
 
     // Define variables to store the sensor manager and the gyroscope sensor
-    private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
     // Implement the onSensorChanged method to handle gyroscope sensor events
@@ -91,7 +88,7 @@ class SensorAccelerometer(context: Context) : SensorEventListener {
     }
 }
 
-class SensorMicrophone(private val context: Context, private val activity: RecordingActivity) {
+class SensorMicrophone(private val context: Context, private val activity: RecordingActivity, private val sensorManager: SensorManager) {
     private var microphone: MediaRecorder? = null
     fun start(){
         if(checkPermission()){
@@ -118,7 +115,7 @@ class SensorMicrophone(private val context: Context, private val activity: Recor
         microphone!!.stop()
     }
 
-    fun checkPermission():Boolean{
+    private fun checkPermission():Boolean{
         return (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
                 && (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
     }
