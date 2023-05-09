@@ -7,7 +7,7 @@
         android:id="@+id/parentLayoutMainActivity"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.5"
+        android:background="@color/light_green"
         tools:context=".MainActivity">
 
         <Button
@@ -17,8 +17,7 @@
             android:layout_marginStart="150dp"
             android:layout_marginTop="512dp"
             android:layout_marginEnd="150dp"
-            android:alpha="1"
-            android:backgroundTint="@color/red"
+            android:backgroundTint="@color/blue_green"
             android:fontFamily="@font/oswald_family"
             android:text="@string/login"
             android:textColor="@color/black"
@@ -61,8 +60,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/oswald_family"
                 android:hint="@string/email"
-                android:textColor="@color/black"
-                android:textSize="20sp" />
+                android:textColor="@color/black"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
@@ -98,8 +96,7 @@
                 android:fontFamily="@font/oswald_family"
                 android:hint="@string/password"
                 android:inputType="textPassword"
-                android:textColor="@color/black"
-                android:textSize="20sp" />
+                android:textColor="@color/black"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
