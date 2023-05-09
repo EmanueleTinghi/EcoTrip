@@ -4,28 +4,43 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
         android:id="@+id/parentLayoutMainActivity"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:alpha="0.5"
+        android:background="@color/material_dynamic_primary90"
         tools:context=".MainActivity">
 
         <Button
             android:id="@+id/loginButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="160dp"
-            android:layout_marginTop="500dp"
+            android:layout_marginStart="150dp"
+            android:layout_marginTop="564dp"
+            android:layout_marginEnd="150dp"
+            android:alpha="1"
+            android:backgroundTint="@color/red"
+            android:fontFamily="@font/oswald_family"
             android:text="@string/login"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/emailView"
-            android:layout_width="106dp"
-            android:layout_height="19dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="52dp"
-            android:layout_marginTop="196dp"
-            android:text="Insert email:"
+            android:layout_marginTop="260dp"
+            android:fontFamily="@font/oswald_family"
+            android:text="@string/insert_email"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -34,10 +49,10 @@
             android:layout_width="300dp"
             android:layout_height="50dp"
             android:layout_marginStart="30dp"
-            android:layout_marginTop="225dp"
+            android:layout_marginTop="300dp"
             android:layout_marginEnd="30dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.49"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -45,16 +60,23 @@
                 android:id="@+id/inputEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="email" />
+                android:fontFamily="@font/oswald_family"
+                android:hint="@string/email"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
             android:id="@+id/passwordView"
-            android:layout_width="106dp"
-            android:layout_height="19dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="52dp"
-            android:layout_marginTop="304dp"
+            android:layout_marginTop="372dp"
+            android:fontFamily="@font/oswald_family"
             android:text="@string/insert_password"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -63,10 +85,10 @@
             android:layout_width="300dp"
             android:layout_height="50dp"
             android:layout_marginStart="30dp"
-            android:layout_marginTop="335dp"
+            android:layout_marginTop="410dp"
             android:layout_marginEnd="30dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.49"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -74,20 +96,24 @@
                 android:id="@+id/inputPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/oswald_family"
                 android:hint="@string/password"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:textColor="@color/black"
+                android:textSize="20sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
             android:id="@+id/errorTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="55dp"
-            android:layout_marginTop="412dp"
-            android:layout_marginEnd="49dp"
-            android:text="TextView"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="496dp"
+            android:layout_marginEnd="50dp"
+            android:textStyle="bold"
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

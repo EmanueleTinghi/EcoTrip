@@ -6,4 +6,8 @@
     <string name="insert_password">Insert password:</string>
     <string name="password">password</string>
     <string name="insert_email">Insert email:</string>
+    <string name="email">email</string>
+    <string name="start">Start</string>
+    <string name="view_result">view result</string>
+    <string name="back">back</string>
 </resources>
