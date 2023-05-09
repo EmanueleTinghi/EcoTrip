@@ -52,15 +52,27 @@
             android:id="@+id/welcomeTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="180dp"
+            android:layout_marginTop="280dp"
+            android:layout_marginEnd="180dp"
             android:fontFamily="@font/oswald_family"
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:layout_marginStart="180dp"
-            android:layout_marginTop="280dp"
-            android:layout_marginEnd="180dp"
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/logoutButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="320dp"
+            android:layout_marginTop="60dp"
+            android:backgroundTint="@color/light_green"
+            android:contentDescription="@string/start_recording"
+            android:src="@drawable/logout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

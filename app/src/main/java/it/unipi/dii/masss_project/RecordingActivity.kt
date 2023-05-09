@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -61,9 +62,26 @@ class RecordingActivity : AppCompatActivity() {
         val resultButton: Button = binding.resultButton
         resultButton.setOnClickListener {onResult() }
 
+        // add listener for logoutButton
+        val logoutButton: ImageButton = binding.logoutButton
+        logoutButton.setOnClickListener {onLogout() }
+
         // Check if the user has granted location permissions at runtime
         checkLocationPermission()
 
+    }
+
+    private fun onLogout() {
+        val startButton: Button = binding.startButton
+        if(startButton.text == "Start") {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        } else {
+            val message = "You hae to stop recording first"
+            val duration = Toast.LENGTH_LONG
+            val toast = Toast.makeText(this, message, duration)
+            toast.show()
+        }
     }
 
     private fun onStartAttempt(binding: ActivityRecordingBinding, activity: RecordingActivity) {
