@@ -29,20 +29,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
+        <ImageButton
             android:id="@+id/recordingButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="240dp"
+            android:layout_marginStart="300dp"
             android:layout_marginTop="60dp"
-            android:backgroundTint="@color/green"
-            android:fontFamily="@font/oswald_family"
-            android:text="@string/start"
-            android:textColor="@color/black"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            app:icon="@drawable/forward"
-            app:iconTint="@color/black"
+            android:backgroundTint="@color/light_green"
+            android:src="@drawable/forward"
+            android:visibility="invisible"
+            android:contentDescription="@string/start_recording"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
