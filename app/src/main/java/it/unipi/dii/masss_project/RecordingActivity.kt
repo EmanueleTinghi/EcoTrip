@@ -24,7 +24,6 @@ class RecordingActivity : AppCompatActivity() {
     private var gyroscope: SensorGyroscope? = null
     private var accelerometer: SensorAccelerometer? = null
     private var microphone: SensorMicrophone? = null
-    private val sensorManager: SensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,7 +82,7 @@ class RecordingActivity : AppCompatActivity() {
             val activity = activity
             microphone = SensorMicrophone(this, activity, sensorManager)
 
-            microphone!!.start()
+            //microphone!!.start()
 
             /****************           TO-DO              ****************/
 
@@ -94,7 +93,7 @@ class RecordingActivity : AppCompatActivity() {
             binding.startButton.text = "Start"
             gyroscope!!.stop()
             accelerometer!!.stop()
-            microphone!!.stop()
+            //microphone!!.stop()
 
             val resultButton: Button = binding.resultButton
             resultButton.visibility = View.VISIBLE
