@@ -15,11 +15,13 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
 
+@Suppress("NAME_SHADOWING")
 class RecordingActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRecordingBinding
@@ -27,6 +29,9 @@ class RecordingActivity : AppCompatActivity() {
     private lateinit var username: String
 
     private var lastUpdateAccelerometer: Long = 0
+    private var gyroscope: SensorGyroscope? = null
+    private var accelerometer: SensorAccelerometer? = null
+    private var microphone: SensorMicrophone? = null
 
     private var startPoint: Location = Location("Start point")
     private var endPoint: Location = Location("End point")
@@ -50,7 +55,7 @@ class RecordingActivity : AppCompatActivity() {
 
         // add listener for startButton
         val startButton: Button = binding.startButton
-        startButton.setOnClickListener {onStartAttempt(binding) }
+        startButton.setOnClickListener {onStartAttempt(binding, this) }
 
         // add listener for resultButton
         val resultButton: Button = binding.resultButton
@@ -61,7 +66,7 @@ class RecordingActivity : AppCompatActivity() {
 
     }
 
-    private fun onStartAttempt(binding: ActivityRecordingBinding) {
+    private fun onStartAttempt(binding: ActivityRecordingBinding, activity: RecordingActivity) {
         if (binding.startButton.text == "Start") {
             "Stop".also { binding.startButton.text = it }
 
@@ -77,13 +82,22 @@ class RecordingActivity : AppCompatActivity() {
             /**************** Get an instance of the SensorManager ****************/
             val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
-            /****************           Accelerometer              ****************/
-            // Get the accelerometer sensor
-            val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-            val accelerometerListener = SensorAccelerometer()
-            sensorManager.registerListener(accelerometerListener,
-                                                accelerometer,
-                                                SensorManager.SENSOR_DELAY_NORMAL)
+            /********************          Accelerometer          ********************/
+            //Initialize the accelerometer sensor
+            accelerometer = SensorAccelerometer(sensorManager)
+            accelerometer!!.start()
+
+            /********************          Gyroscope          ********************/
+            //Initialize the gyroscope sensor
+            gyroscope = SensorGyroscope(sensorManager)
+            gyroscope!!.start()
+
+            /********************          Microphone          ********************/
+            //Initialize the gyroscope sensor
+            val activity = activity
+            microphone = SensorMicrophone(this, activity, sensorManager)
+
+            //microphone!!.start()
 
             /****************           GPS              ****************/
             // retrieve user current location - start point
@@ -95,6 +109,10 @@ class RecordingActivity : AppCompatActivity() {
             // todo: usare classificatore per rilevare mezzo di trasporto
 
         } else {
+            gyroscope!!.stop()
+            accelerometer!!.stop()
+            //microphone!!.stop()
+
             "Start".also { binding.startButton.text = it }
 
             val resultButton: Button = binding.resultButton
