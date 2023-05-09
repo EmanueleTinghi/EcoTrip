@@ -13,7 +13,7 @@
 
         <Button
             android:id="@+id/loginButton"
-            android:background="@color/purple_700"
+            android:background="@color/"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="160dp"
@@ -57,13 +57,15 @@
 
         <TextView
             android:id="@+id/passwordView"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:layout_width="106dp"
-            android:layout_height="19dp"
-            android:layout_marginStart="52dp"
-            android:layout_marginTop="304dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="60dp"
+            android:layout_marginTop="288dp"
+            android:fontFamily="@font/oswald_family"
             android:text="@string/insert_password"
+            android:textColor="@color/black"
+            android:textSize="24sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
