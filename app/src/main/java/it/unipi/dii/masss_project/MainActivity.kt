@@ -183,6 +183,7 @@ class MainActivity : AppCompatActivity() {
         val username: String = parts[0]
         val intent = Intent(this, RecordingActivity::class.java)
         intent.putExtra("username", username)
+        intent.putExtra("auth", email)
         startActivity(intent)
     }
 

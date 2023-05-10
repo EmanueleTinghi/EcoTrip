@@ -10,6 +10,18 @@
         android:background="@color/light_green"
         tools:context=".ResultActivity">
 
+        <ImageButton
+            android:id="@+id/logoutButton2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="320dp"
+            android:layout_marginTop="60dp"
+            android:backgroundTint="@color/light_green"
+            android:contentDescription="@string/start_recording"
+            android:src="@drawable/logout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <Button
             android:id="@+id/backButton"
             android:layout_width="wrap_content"

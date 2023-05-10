@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
@@ -16,13 +15,12 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import com.google.firebase.auth.FirebaseAuth
 import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
 
-@Suppress("NAME_SHADOWING")
 class RecordingActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRecordingBinding
@@ -39,6 +37,8 @@ class RecordingActivity : AppCompatActivity() {
 
     private val distances = mutableListOf<Float>()
     private var finalDistance = 0.0f
+
+    private var startedRecording: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,6 +74,7 @@ class RecordingActivity : AppCompatActivity() {
     private fun onLogout() {
         val startButton: Button = binding.startButton
         if(startButton.text == "Start") {
+            FirebaseAuth.getInstance().signOut()
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         } else {
@@ -87,6 +88,9 @@ class RecordingActivity : AppCompatActivity() {
     private fun onStartAttempt(binding: ActivityRecordingBinding, activity: RecordingActivity) {
         if (binding.startButton.text == "Start") {
             "Stop".also { binding.startButton.text = it }
+
+            // Block the user in this activity until stopped recording
+            startedRecording = true
 
             // hide resultButton when user starts a trip
             val resultButton: Button = binding.resultButton
@@ -112,7 +116,6 @@ class RecordingActivity : AppCompatActivity() {
 
             /********************          Microphone          ********************/
             //Initialize the gyroscope sensor
-            val activity = activity
             microphone = SensorMicrophone(this, activity, sensorManager)
 
             //microphone!!.start()
@@ -130,6 +133,9 @@ class RecordingActivity : AppCompatActivity() {
             gyroscope!!.stop()
             accelerometer!!.stop()
             //microphone!!.stop()
+
+            // Block the user in this activity until stopped recording
+            startedRecording = false
 
             "Start".also { binding.startButton.text = it }
 
@@ -254,4 +260,10 @@ class RecordingActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        // Do nothing to disable the button
+    }
+
 }
+
