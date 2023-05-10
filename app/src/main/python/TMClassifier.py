@@ -1,5 +1,6 @@
 import os
-from os.path import join
+from os import listdir
+from os.path import join, dirname
 import numpy as np
 import pandas as pd
 
@@ -11,8 +12,17 @@ class TMClassifier:
     sensors = ['android.sensor.accelerometer', 'android.sensor.gyroscope', 'sound']
 
     def __init__(self):
-#         self.__classifier_model = pickle.load(open("random_forest.pkl", 'rb'))
-        pass
+        print("init py")
+        files = listdir(dirname(__file__))
+        for f in files:
+            print(f)
+        filename = join(dirname(__file__), "random_forest.pkl")
+        print(filename)
+#     #     os.remove(filename)
+#         with open(filename, 'rb') as f:
+#             print("boh")
+        self.__classifier_model = pickle.load(open(filename), 'rb')
+
 
     def store_accelerator_sample(self, timestamp, magnitude):
         self.samples_dict['time'].append(timestamp)
