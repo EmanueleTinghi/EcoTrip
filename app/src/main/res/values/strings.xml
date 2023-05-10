@@ -10,4 +10,5 @@
     <string name="start">Start</string>
     <string name="view_result">view result</string>
     <string name="back">back</string>
+    <string name="start_recording">Start recording</string>
 </resources>

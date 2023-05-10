@@ -4,8 +4,12 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import com.google.firebase.auth.FirebaseAuth
 import it.unipi.dii.masss_project.databinding.ActivityResultBinding
 
 class ResultActivity : AppCompatActivity() {
@@ -31,6 +35,10 @@ class ResultActivity : AppCompatActivity() {
         // register listener for backButton
         val backButton = binding.backButton
         backButton.setOnClickListener { onBackPressed(binding) }
+
+        // add listener for logoutButton
+        val logoutButton: ImageButton = binding.logoutButton2
+        logoutButton.setOnClickListener {onLogout() }
     }
 
     private fun onBackPressed(binding: ActivityResultBinding) {
@@ -38,4 +46,11 @@ class ResultActivity : AppCompatActivity() {
         intent.putExtra("username", username)
         startActivity(intent)
     }
+
+    private fun onLogout() {
+        FirebaseAuth.getInstance().signOut()
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+    }
+
 }
