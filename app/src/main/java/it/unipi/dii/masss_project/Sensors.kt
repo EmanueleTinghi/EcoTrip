@@ -12,6 +12,8 @@ import android.media.MediaRecorder
 import android.os.Environment
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class SensorGyroscope(private val sensorManager: SensorManager) : SensorEventListener {
 
@@ -24,9 +26,13 @@ class SensorGyroscope(private val sensorManager: SensorManager) : SensorEventLis
         val y = event.values[1]
         val z = event.values[2]
 
+        val magnitude = sqrt(((x.pow(2)) + (y.pow(2)) + (z.pow(2))).toDouble())
+        val samples = "${event.timestamp},${event.sensor.stringType},${magnitude}\n"
+        // todo: call a function storing the sample collected to then send to the python module
+        SensorsCollector.store_gyroscope_sample(event.timestamp, magnitude)
         // Do something with the gyroscope data
         // For example, log the gyroscope data to the console
-        Log.d("Gyroscope: ", "x=$x y=$y z=$z")
+//        Log.d("Gyroscope: ", "x=$x y=$y z=$z")
     }
 
     // Implement the onAccuracyChanged method to handle gyroscope sensor accuracy changes
@@ -62,17 +68,19 @@ class SensorAccelerometer(private val sensorManager: SensorManager) : SensorEven
         val y = event.values[1]
         val z = event.values[2]
 
+        val magnitude = sqrt(((x.pow(2)) + (y.pow(2)) + (z.pow(2))).toDouble())
+        SensorsCollector.store_accelerator_sample(event.timestamp, magnitude)
         // Do something with the gyroscope data
         // For example, log the gyroscope data to the console
-        Log.d("Accelerometer: ", "x=$x y=$y z=$z")
+//        Log.d("Accelerometer: ", "x=$x y=$y z=$z")
     }
 
-    // Implement the onAccuracyChanged method to handle gyroscope sensor accuracy changes
+    // Implement the onAccuracyChanged method to handle accelerometer sensor accuracy changes
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // Do something when the gyroscope sensor accuracy changes
     }
 
-    // Register the gyroscope sensor listener when the GyroscopeManager object is created
+    // Register the accelerometer sensor listener when the GyroscopeManager object is created
     init {
         sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL)
     }

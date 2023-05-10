@@ -28,7 +28,6 @@ class RecordingActivity : AppCompatActivity() {
 
     private lateinit var username: String
 
-    private var lastUpdateAccelerometer: Long = 0
     private var gyroscope: SensorGyroscope? = null
     private var accelerometer: SensorAccelerometer? = null
     private var microphone: SensorMicrophone? = null
@@ -112,6 +111,7 @@ class RecordingActivity : AppCompatActivity() {
             gyroscope!!.stop()
             accelerometer!!.stop()
             //microphone!!.stop()
+            SensorsCollector.print_res()
 
             "Start".also { binding.startButton.text = it }
 
