@@ -14,8 +14,8 @@
             android:id="@+id/logoutButton2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="320dp"
-            android:layout_marginTop="60dp"
+            android:layout_marginStart="328dp"
+            android:layout_marginTop="48dp"
             android:backgroundTint="@color/light_green"
             android:contentDescription="@string/start_recording"
             android:src="@drawable/logout"
@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="150dp"
-            android:layout_marginTop="344dp"
+            android:layout_marginTop="512dp"
             android:layout_marginEnd="150dp"
             android:backgroundTint="@color/green"
             android:fontFamily="@font/oswald_family"
@@ -38,6 +38,7 @@
             app:icon="@drawable/back"
             app:iconTint="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -45,16 +46,36 @@
             android:id="@+id/resultTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="56dp"
+            android:layout_marginEnd="110dp"
             android:fontFamily="@font/oswald_family"
             android:textColor="@color/black"
-            android:textSize="24sp"
+            android:textSize="20sp"
             android:textStyle="bold"
-            android:layout_marginStart="180dp"
-            android:layout_marginTop="236dp"
-            android:layout_marginEnd="180dp"
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/tab_layout"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0"
+            app:layout_constraintVertical_chainStyle="packed"
+            android:contentDescription="@string/viewpager"/>
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/tertiary"
+            app:layout_constraintBottom_toTopOf="@+id/backButton"
+            app:layout_constraintTop_toBottomOf="@+id/view_pager"
+            android:contentDescription="TabLayout"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
