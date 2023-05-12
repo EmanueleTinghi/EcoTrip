@@ -76,19 +76,21 @@ class SchedulePagerAdapter(fragmentManager: FragmentManager) : FragmentPagerAdap
             0 -> Schedule1Fragment()
             1 -> Schedule2Fragment()
             2 -> Schedule3Fragment()
+            3 -> Schedule4Fragment()
             else -> throw IllegalArgumentException("Invalid position: $position")
         }
     }
 
     override fun getCount(): Int {
-        return 3
+        return 4
     }
 
     override fun getPageTitle(position: Int): CharSequence? {
         return when (position) {
             0 -> "<1Km trip"
-            1 -> "1-10Km trip"
-            2 -> ">10Km trip"
+            1 -> "1-5Km trip"
+            2 -> "5-10Km trip"
+            3 -> ">10Km trip"
             else -> null
         }
     }
@@ -115,5 +117,12 @@ class Schedule3Fragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.schedule_3, container, false)
+    }
+}
+
+class Schedule4Fragment : Fragment() {
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.schedule_4, container, false)
     }
 }
