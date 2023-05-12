@@ -1,16 +1,17 @@
 package it.unipi.dii.masss_project
 
 import android.Manifest
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.SensorManager
-import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
@@ -20,9 +21,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
-import java.util.Locale
 
 class RecordingActivity : AppCompatActivity() {
 
@@ -32,10 +33,11 @@ class RecordingActivity : AppCompatActivity() {
 
     private lateinit var db: FirebaseFirestore
 
-    private var lastUpdateAccelerometer: Long = 0
     private var gyroscope: SensorGyroscope? = null
     private var accelerometer: SensorAccelerometer? = null
     private var microphone: SensorMicrophone? = null
+
+    private lateinit var meansOfTransportDetected: String
 
     private lateinit var startCity: String
     private var startPoint: Location = Location("Start point")
@@ -156,14 +158,14 @@ class RecordingActivity : AppCompatActivity() {
             val toast = Toast.makeText(this, message, duration)
             toast.show()
 
+            // todo: obtain classification results
+            // meansOfTransportDetected = "car"
+
             // retrieve user current location - end point
             // and calculate distance between start and end points
             val progress = StringBuilder()
             progress.append("Stop")
             getLocation(progress)
-
-            // todo: collezionare risultati del transportation mode
-
 
             // todo: passare ad unl'altra pagina che mostra i risultati ottenuti
             //val intent = Intent(this, ResultActivity::class.java)
@@ -241,19 +243,231 @@ class RecordingActivity : AppCompatActivity() {
                         finalDistance = distances.sum()
                         println("FINAL DISTANCE: $finalDistance km")
 
+                        // empty distances list
+                        distances.clear()
+
                         // Stop receiving location updates
                         locationManager.removeUpdates(this)
 
-                        if(finalDistance < 1){
+                        // retrieve aggregate results for start city, if any
+                        val query = db.collection("aggregateResults").whereEqualTo("city", startCity)
+                        query.get().addOnSuccessListener { documents ->
+                            if (documents.isEmpty) {
+                                // No documents found for start city -> create a new document
+                                lateinit var aggregateResults: AggregateResults
+                                if(finalDistance > 0 && finalDistance < 1){
+                                    when(meansOfTransportDetected){
+                                        "bus" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 1, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                        "car" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 1, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                        "train" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 1, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                        "walking" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 1),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                    }
+                                } else if(finalDistance >= 1 && finalDistance < 5) {
 
-                        } else if(finalDistance >= 1 && finalDistance < 5) {
+                                    when(meansOfTransportDetected){
+                                        "bus" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 1, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                        "car" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 1, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                        "train" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 1, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                        "walking" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 1),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                    }
 
-                        } else if(finalDistance >= 5 && finalDistance < 10) {
+                                } else if(finalDistance >= 5 && finalDistance < 10) {
 
-                        } else if(finalDistance >= 10 && finalDistance < 15) {
+                                    when(meansOfTransportDetected){
+                                        "bus" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 1, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                        "car" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 1, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                        "train" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 1, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                        "walking" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 1),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                    }
 
+                                } else if(finalDistance >= 10) {
+
+                                    when(meansOfTransportDetected){
+                                        "bus" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 1, "car" to 0, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                        "car" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 1, "train" to 0, "walking" to 0)
+                                            )
+                                        )
+                                        "train" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 1, "walking" to 0)
+                                            )
+                                        )
+                                        "walking" -> aggregateResults = AggregateResults(
+                                            city = startCity,
+                                            travelDistances = mapOf(
+                                                "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                                                "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 1)
+                                            )
+                                        )
+                                    }
+                                }
+                                val aggregateResultsRef = db.collection("aggregateResults").document(startCity)
+                                aggregateResultsRef.set(aggregateResults)
+
+                            } else {
+                                // Document(s) found for start city -> update document
+                                val increment = FieldValue.increment(1)
+                                lateinit var fieldPath: String
+                                if(finalDistance > 0 && finalDistance < 1){
+                                    when(meansOfTransportDetected){
+                                        "bus" -> fieldPath = "travelDistances.range(<1km).bus"
+                                        "car" -> fieldPath = "travelDistances.range(<1km).car"
+                                        "train" -> fieldPath = "travelDistances.range(<1km).train"
+                                        "walking" -> fieldPath = "travelDistances.range(<1km).walking"
+                                    }
+                                } else if(finalDistance >= 1 && finalDistance < 5) {
+                                    when(meansOfTransportDetected){
+                                        "bus" -> fieldPath = "travelDistances.range(1-5km).bus"
+                                        "car" -> fieldPath = "travelDistances.range(1-5km).car"
+                                        "train" -> fieldPath = "travelDistances.range(1-5km).train"
+                                        "walking" -> fieldPath = "travelDistances.range(1-5km).walking"
+                                    }
+                                } else if(finalDistance >= 5 && finalDistance < 10) {
+                                    when(meansOfTransportDetected){
+                                        "bus" -> fieldPath = "travelDistances.range(5-10km).bus"
+                                        "car" -> fieldPath = "travelDistances.range(5-10km).car"
+                                        "train" -> fieldPath = "travelDistances.range(5-10km).train"
+                                        "walking" -> fieldPath = "travelDistances.range(5-10km).walking"
+                                    }
+                                } else if(finalDistance >= 10) {
+                                    when(meansOfTransportDetected){
+                                        "bus" -> fieldPath = "travelDistances.range(>10km).bus"
+                                        "car" -> fieldPath = "travelDistances.range(>10km).car"
+                                        "train" -> fieldPath = "travelDistances.range(>10km).train"
+                                        "walking" -> fieldPath = "travelDistances.range(>10km).walking"
+                                    }
+                                }
+                                for(document in documents) {
+                                    val docRef = document.reference
+                                    docRef.update(fieldPath, increment)
+                                        .addOnSuccessListener { Log.d(TAG, "Incremented $fieldPath value") }
+                                        .addOnFailureListener { e -> Log.w(TAG, "Error incrementing $fieldPath value", e) }
+
+                                }
+                            }
+                        }.addOnFailureListener { exception ->
+                            // Handle any errors here
+                            val message = "${exception.message}"
+                            val duration = Toast.LENGTH_LONG
+                            val toast = Toast.makeText(context, message, duration)
+                            toast.show()
                         }
-
                     }
                     else -> {
                         // intermediate point
