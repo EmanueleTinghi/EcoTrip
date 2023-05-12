@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.SensorManager
+import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -19,7 +20,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
+import java.util.Locale
 
 class RecordingActivity : AppCompatActivity() {
 
@@ -27,11 +30,14 @@ class RecordingActivity : AppCompatActivity() {
 
     private lateinit var username: String
 
+    private lateinit var db: FirebaseFirestore
+
     private var lastUpdateAccelerometer: Long = 0
     private var gyroscope: SensorGyroscope? = null
     private var accelerometer: SensorAccelerometer? = null
     private var microphone: SensorMicrophone? = null
 
+    private lateinit var startCity: String
     private var startPoint: Location = Location("Start point")
     private var endPoint: Location = Location("End point")
 
@@ -48,6 +54,9 @@ class RecordingActivity : AppCompatActivity() {
 
         binding= DataBindingUtil.setContentView(
             this, R.layout.activity_recording)
+
+        // initialize firebase firestore
+        db = FirebaseFirestore.getInstance()
 
         // add welcome text view
         val welcomeTextView: TextView = binding.welcomeTextView
@@ -181,6 +190,10 @@ class RecordingActivity : AppCompatActivity() {
 
     private fun getLocation(progress: StringBuilder) {
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        // get the application context
+        val context = this
+
         val locationListener = object : LocationListener {
             @Deprecated("Deprecated in Java")
             override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
@@ -196,6 +209,18 @@ class RecordingActivity : AppCompatActivity() {
                         // start point
                         startPoint.latitude = latitude
                         startPoint.longitude = longitude
+
+                        // get start city from gps coordinates
+                        val geocoderTask = GeocoderTask(context, object : GeocoderTask.OnGeocoderCompletedListener {
+                            override fun onGeocoderCompleted(cityName: String?) {
+                                if (cityName != null) {
+                                    startCity = cityName
+                                    println("START CITY: $startCity")
+                                }
+                            }
+                        })
+                        geocoderTask.execute(startPoint)
+
                         println("START LOCATION: latitude ${startPoint.latitude}, longitude ${startPoint.longitude}")
                         progress.append("Intermediate")
 
@@ -218,6 +243,16 @@ class RecordingActivity : AppCompatActivity() {
 
                         // Stop receiving location updates
                         locationManager.removeUpdates(this)
+
+                        if(finalDistance < 1){
+
+                        } else if(finalDistance >= 1 && finalDistance < 5) {
+
+                        } else if(finalDistance >= 5 && finalDistance < 10) {
+
+                        } else if(finalDistance >= 10 && finalDistance < 15) {
+
+                        }
 
                     }
                     else -> {
