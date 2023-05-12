@@ -3,6 +3,7 @@ package it.unipi.dii.masss_project
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -17,6 +18,9 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
+import java.io.IOException
+import java.io.InputStream
+import org.tensorflow.lite.TensorFlowLite as tfl
 
 
 class MainActivity : AppCompatActivity() {
@@ -43,7 +47,18 @@ class MainActivity : AppCompatActivity() {
         // add listener for loginButton
         val button: Button = binding.loginButton
         button.setOnClickListener{onLoginAttempt()}
+        var string: String = ""
+        try {
+            val inputStream: InputStream = assets.open("test_assets.txt")
+            val size: Int = inputStream.available()
+            val buffer = ByteArray(size)
+            inputStream.read(buffer)
+            string = String(buffer)
 
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        println(string)
     }
 
     private fun onLoginAttempt() {
