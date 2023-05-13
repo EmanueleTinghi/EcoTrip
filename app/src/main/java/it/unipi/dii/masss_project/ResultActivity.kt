@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -16,7 +15,12 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import it.unipi.dii.masss_project.databinding.ActivityResultBinding
+import it.unipi.dii.masss_project.databinding.Schedule1Binding
+import it.unipi.dii.masss_project.databinding.Schedule2Binding
+import it.unipi.dii.masss_project.databinding.Schedule3Binding
+import it.unipi.dii.masss_project.databinding.Schedule4Binding
 
 class ResultActivity : AppCompatActivity() {
 
@@ -33,14 +37,13 @@ class ResultActivity : AppCompatActivity() {
         username = intent.getStringExtra("username").toString()
 
         // add text view to see the user result
-        // todo : aggiungere il testo del risutato ottenuto
         val resultTextView: TextView = binding.resultTextView
         "$username, this are your results:\n".also { resultTextView.text = it }
         resultTextView.visibility = View.VISIBLE
 
         // register listener for backButton
         val backButton = binding.backButton
-        backButton.setOnClickListener { onBackPressed(binding) }
+        backButton.setOnClickListener { onBackButtonPressed() }
 
         // add listener for logoutButton
         val logoutButton: ImageButton = binding.logoutButton2
@@ -54,7 +57,7 @@ class ResultActivity : AppCompatActivity() {
 
     }
 
-    private fun onBackPressed(binding: ActivityResultBinding) {
+    private fun onBackButtonPressed() {
         val intent = Intent(this, RecordingActivity::class.java)
         intent.putExtra("username", username)
         startActivity(intent)
@@ -72,7 +75,6 @@ class SchedulePagerAdapter(fragmentManager: FragmentManager) : FragmentPagerAdap
 
     override fun getItem(position: Int): Fragment {
         return when (position) {
-
             0 -> Schedule1Fragment()
             1 -> Schedule2Fragment()
             2 -> Schedule3Fragment()
@@ -101,28 +103,245 @@ class SchedulePagerAdapter(fragmentManager: FragmentManager) : FragmentPagerAdap
  */
 class Schedule1Fragment : Fragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.schedule_1, container, false)
+    private lateinit var binding: Schedule1Binding
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+
+        binding = Schedule1Binding.inflate(inflater, container, false)
+
+        // initialize firebase authentication
+        auth = FirebaseAuth.getInstance()
+        // initialize firebase firestore
+        db = FirebaseFirestore.getInstance()
+
+        // Get the currently signed-in user
+        val currentUser = auth.currentUser
+
+        // Retrieve the user ID
+        val userID = currentUser?.uid
+
+        if (userID != null) {
+            // Get a reference to the user document
+            val userRef = db.collection("users").document(userID)
+
+            // Get the user data
+            userRef.get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val result = document.getString("last_<1km")
+
+                        // add text view to see result
+                        val resultTextView: TextView = binding.textViewSchedule1
+
+                        if( result!= null) {
+                            "$result".also { resultTextView.text = it }
+                        } else {
+                            "you haven't done any <1km trips yet".also { resultTextView.text = it }
+                        }
+                        resultTextView.visibility = View.VISIBLE
+
+                    } else {
+                        // User document does not exist
+                        val message = "User document does not exist"
+                        val duration = Toast.LENGTH_LONG
+                        val toast = Toast.makeText(context, message, duration)
+                        toast.show()
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    // Handle any errors here
+                    val message = "${exception.message}"
+                    val duration = Toast.LENGTH_LONG
+                    val toast = Toast.makeText(context, message, duration)
+                    toast.show()
+                }
+        }
+        return binding.root
     }
 }
 
 class Schedule2Fragment : Fragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.schedule_2, container, false)
+    private lateinit var binding: Schedule2Binding
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+
+        binding = Schedule2Binding.inflate(inflater, container, false)
+
+        // initialize firebase authentication
+        auth = FirebaseAuth.getInstance()
+        // initialize firebase firestore
+        db = FirebaseFirestore.getInstance()
+
+        // Get the currently signed-in user
+        val currentUser = auth.currentUser
+
+        // Retrieve the user ID
+        val userID = currentUser?.uid
+
+        if (userID != null) {
+            // Get a reference to the user document
+            val userRef = db.collection("users").document(userID)
+
+            // Get the user data
+            userRef.get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val result = document.getString("last_1-5km")
+
+                        // add text view to see result
+                        val resultTextView: TextView = binding.textViewSchedule2
+
+                        if( result!= null) {
+                            "$result".also { resultTextView.text = it }
+                        } else {
+                            "you haven't done any 1-5km trips yet".also { resultTextView.text = it }
+                        }
+                        resultTextView.visibility = View.VISIBLE
+                    } else {
+                        // User document does not exist
+                        val message = "User document does not exist"
+                        val duration = Toast.LENGTH_LONG
+                        val toast = Toast.makeText(context, message, duration)
+                        toast.show()
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    // Handle any errors here
+                    val message = "${exception.message}"
+                    val duration = Toast.LENGTH_LONG
+                    val toast = Toast.makeText(context, message, duration)
+                    toast.show()
+                }
+        }
+        return binding.root
     }
 }
 
 class Schedule3Fragment : Fragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.schedule_3, container, false)
+    private lateinit var binding: Schedule3Binding
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+
+        binding = Schedule3Binding.inflate(inflater, container, false)
+
+        // initialize firebase authentication
+        auth = FirebaseAuth.getInstance()
+        // initialize firebase firestore
+        db = FirebaseFirestore.getInstance()
+
+        // Get the currently signed-in user
+        val currentUser = auth.currentUser
+
+        // Retrieve the user ID
+        val userID = currentUser?.uid
+
+        if (userID != null) {
+            // Get a reference to the user document
+            val userRef = db.collection("users").document(userID)
+
+            // Get the user data
+            userRef.get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val result = document.getString("last_5-10km")
+
+                        // add text view to see result
+                        val resultTextView: TextView = binding.textViewSchedule3
+
+                        if( result!= null) {
+                            "$result".also { resultTextView.text = it }
+                        } else {
+                            "you haven't done any 5-10km trips yet".also { resultTextView.text = it }
+                        }
+                        resultTextView.visibility = View.VISIBLE
+                    } else {
+                        // User document does not exist
+                        val message = "User document does not exist"
+                        val duration = Toast.LENGTH_LONG
+                        val toast = Toast.makeText(context, message, duration)
+                        toast.show()
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    // Handle any errors here
+                    val message = "${exception.message}"
+                    val duration = Toast.LENGTH_LONG
+                    val toast = Toast.makeText(context, message, duration)
+                    toast.show()
+                }
+        }
+        return binding.root
     }
 }
 
 class Schedule4Fragment : Fragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.schedule_4, container, false)
+    private lateinit var binding: Schedule4Binding
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+
+        binding = Schedule4Binding.inflate(inflater, container, false)
+
+        // initialize firebase authentication
+        auth = FirebaseAuth.getInstance()
+        // initialize firebase firestore
+        db = FirebaseFirestore.getInstance()
+
+        // Get the currently signed-in user
+        val currentUser = auth.currentUser
+
+        // Retrieve the user ID
+        val userID = currentUser?.uid
+
+        if (userID != null) {
+            // Get a reference to the user document
+            val userRef = db.collection("users").document(userID)
+
+            // Get the user data
+            userRef.get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val result = document.getString("last_>10km")
+
+                        // add text view to see result
+                        val resultTextView: TextView = binding.textViewSchedule4
+
+                        if( result!= null) {
+                            "$result".also { resultTextView.text = it }
+                        } else {
+                            "you haven't done any >10km trips yet".also { resultTextView.text = it }
+                        }
+                        resultTextView.visibility = View.VISIBLE
+                    } else {
+                        // User document does not exist
+                        val message = "User document does not exist"
+                        val duration = Toast.LENGTH_LONG
+                        val toast = Toast.makeText(context, message, duration)
+                        toast.show()
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    // Handle any errors here
+                    val message = "${exception.message}"
+                    val duration = Toast.LENGTH_LONG
+                    val toast = Toast.makeText(context, message, duration)
+                    toast.show()
+                }
+        }
+        return binding.root
     }
 }
