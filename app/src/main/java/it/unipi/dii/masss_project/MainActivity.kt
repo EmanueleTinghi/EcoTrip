@@ -18,8 +18,13 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
+import org.tensorflow.lite.Interpreter
+import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
+import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
+
 import org.tensorflow.lite.TensorFlowLite as tfl
 
 
@@ -97,8 +102,7 @@ class MainActivity : AppCompatActivity() {
                             errorTextView.visibility = View.VISIBLE
                         }
                     }
-            }
-            else{
+            } else {
                 // Otherwise show error message
                 val message = "Insert email and password, please"
                 val duration = Toast.LENGTH_LONG
@@ -222,4 +226,23 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
+//    private fun loadModelFile(assetManager: AssetManager, modelPath: String): MappedByteBuffer {
+//        val fileDescriptor = assetManager.openFd(modelPath)
+//        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
+//        val fileChannel = inputStream.channel
+//        val startOffset = fileDescriptor.startOffset
+//        val declaredLength = fileDescriptor.declaredLength
+//        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
+//    }
+    // INTERPRETER = Interpreter(loadModelFile(assetManager, modelPath))
+    /* val tfliteModel = FileUtil.loadMappedFile(context, "model.tflite")
+    val interpreter = Interpreter(tfliteModel)
+
+    // Get input and output tensors.
+    val inputTensor = interpreter.getInputTensor(0)
+    val outputTensor = interpreter.getOutputTensor(0)
+
+    // Run inference
+    interpreter.run(inputTensor.buffer, outputTensor.buffer.rewind())
+    */
 }

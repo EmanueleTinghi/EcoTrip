@@ -13,15 +13,18 @@ class TMClassifier:
 
     def __init__(self):
         print("init py")
-        files = listdir(dirname(__file__))
-        for f in files:
-            print(f)
-        filename = join(dirname(__file__), "random_forest.pkl")
-        print(filename)
-#     #     os.remove(filename)
-#         with open(filename, 'rb') as f:
-#             print("boh")
-        self.__classifier_model = pickle.load(open(filename), 'rb')
+#         files = listdir(dirname(__file__))
+#         for f in files:
+#             print(f)
+        saved_model_dir = "saved_model/keras_model/"
+        filename = join(dirname(__file__), saved_model_dir)
+#         print(filename)
+#         classifier_model = tf.keras.models.load_model(saved_model_dir)
+#         print(classifier_model is not None)
+# #         with open("rf_model.joblib", 'rb') as f:
+# #             print("boh")
+#             self.__classifier_model = joblib.load(filename)
+#         self.__classifier_model = pickle.load(open(filename), 'rb')
 
 
     def store_accelerator_sample(self, timestamp, magnitude):

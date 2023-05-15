@@ -53,7 +53,7 @@ android {
     }
 
     androidResources {
-        noCompress 'tflite'
+        noCompress 'lite', 'model', 'pkl'
     }
 }
 
@@ -72,13 +72,18 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore-ktx'
     implementation 'com.google.android.gms:play-services-location:21.0.1'
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.21'
+    implementation 'org.apache.commons:commons-math3:3.6.1'
 //    // Import the BoM for the Firebase platform
 //    implementation platform('com.google.firebase:firebase-bom:32.0.0')
 
-    // Add the dependency for the Firebase ML model downloader library
-    // When using the BoM, you don't specify versions in Firebase library dependencies
-    implementation 'com.google.firebase:firebase-ml-modeldownloader-ktx'
-
-    // Also add the dependency for the TensorFlow Lite library and specify its version
+//    // Add the dependency for the Firebase ML model downloader library
+//    // When using the BoM, you don't specify versions in Firebase library dependencies
+//    implementation 'com.google.firebase:firebase-ml-modeldownloader-ktx'
+//
+//    // Also add the dependency for the TensorFlow Lite library and specify its version
     implementation 'org.tensorflow:tensorflow-lite:2.3.0'
+//
+//    implementation 'org.tensorflow:tensorflow-lite-task-vision-play-services:0.4.2'
+//    implementation 'com.google.android.gms:play-services-tflite-gpu:16.1.0'
 }

@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.AssetManager
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.location.Location
@@ -20,9 +21,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
+import java.io.FileInputStream
+import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
 
 @Suppress("NAME_SHADOWING")
 class RecordingActivity : AppCompatActivity() {
+
+    private lateinit var sensorsCollector: SensorsCollector
 
     private lateinit var binding: ActivityRecordingBinding
 
@@ -30,7 +36,8 @@ class RecordingActivity : AppCompatActivity() {
 
     private var gyroscope: SensorGyroscope? = null
     private var accelerometer: SensorAccelerometer? = null
-    private var microphone: SensorMicrophone? = null
+    private var magneticField: SensorMagneticField? = null
+//    private var microphone: SensorMicrophone? = null
 
     private var startPoint: Location = Location("Start point")
     private var endPoint: Location = Location("End point")
@@ -38,8 +45,20 @@ class RecordingActivity : AppCompatActivity() {
     private val distances = mutableListOf<Float>()
     private var finalDistance = 0.0f
 
+
+    //    private val assetManager = resources.assets //applicationContext.assets
+//    private lateinit var assetManager: AssetManager
+//    private val modelPath = "random_forest.pkl" //""model.model"// "tflite_model1.lite" //"ei-verto-project-1-classifier-tensorflow-lite-int8-quantized-model.lite"
+//    private lateinit var interpreter:MappedByteBuffer //= loadModelFile(assetManager, modelPath)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        sensorsCollector = SensorsCollector(applicationContext)
+
+//        assetManager = applicationContext.assets
+//        println("model path ${modelPath}")
+//        interpreter = loadModelFile(assetManager, modelPath)
 
         // retrieve username from intent
         username = intent.getStringExtra("username").toString()
@@ -83,18 +102,23 @@ class RecordingActivity : AppCompatActivity() {
 
             /********************          Accelerometer          ********************/
             //Initialize the accelerometer sensor
-            accelerometer = SensorAccelerometer(sensorManager)
+            accelerometer = SensorAccelerometer(sensorManager, sensorsCollector)
             accelerometer!!.start()
+
+            /********************          magneticField          ********************/
+            //Initialize the magneticField sensor
+            magneticField = SensorMagneticField(sensorManager, sensorsCollector)
+            magneticField!!.start()
 
             /********************          Gyroscope          ********************/
             //Initialize the gyroscope sensor
-            gyroscope = SensorGyroscope(sensorManager)
+            gyroscope = SensorGyroscope(sensorManager, sensorsCollector)
             gyroscope!!.start()
 
             /********************          Microphone          ********************/
             //Initialize the gyroscope sensor
-            val activity = activity
-            microphone = SensorMicrophone(this, activity, sensorManager)
+//            val activity = activity
+//            microphone = SensorMicrophone(this, activity, sensorManager)
 
             //microphone!!.start()
 
@@ -106,12 +130,15 @@ class RecordingActivity : AppCompatActivity() {
 
             /****************           TO-DO              ****************/
             // todo: usare classificatore per rilevare mezzo di trasporto
+            sensorsCollector.startCollection()
 
         } else {
             gyroscope!!.stop()
             accelerometer!!.stop()
+            magneticField!!.stop()
             //microphone!!.stop()
-            SensorsCollector.print_res()
+//            SensorsCollector.print_res()
+            sensorsCollector.stopCollection()
 
             "Start".also { binding.startButton.text = it }
 
@@ -235,5 +262,14 @@ class RecordingActivity : AppCompatActivity() {
                     Manifest.permission.ACCESS_COARSE_LOCATION), 0)
         }
     }
+
+//    private fun loadModelFile(assetManager: AssetManager, modelPath: String): MappedByteBuffer {
+//        val fileDescriptor = assetManager.openFd(modelPath)
+//        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
+//        val fileChannel = inputStream.channel
+//        val startOffset = fileDescriptor.startOffset
+//        val declaredLength = fileDescriptor.declaredLength
+//        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
+//    }
 
 }

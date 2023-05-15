@@ -15,7 +15,8 @@ import androidx.core.app.ActivityCompat
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class SensorGyroscope(private val sensorManager: SensorManager) : SensorEventListener {
+class SensorGyroscope(private val sensorManager: SensorManager,
+                      private val sensorsCollector: SensorsCollector) : SensorEventListener {
 
     private val gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
 
@@ -28,8 +29,9 @@ class SensorGyroscope(private val sensorManager: SensorManager) : SensorEventLis
 
         val magnitude = sqrt(((x.pow(2)) + (y.pow(2)) + (z.pow(2))).toDouble())
         val samples = "${event.timestamp},${event.sensor.stringType},${magnitude}\n"
+        sensorsCollector.storeGyroscopeSample(magnitude)
         // todo: call a function storing the sample collected to then send to the python module
-        SensorsCollector.store_gyroscope_sample(event.timestamp, magnitude)
+//        SensorsCollector.store_gyroscope_sample(event.timestamp, magnitude)
         // Do something with the gyroscope data
         // For example, log the gyroscope data to the console
 //        Log.d("Gyroscope: ", "x=$x y=$y z=$z")
@@ -56,41 +58,85 @@ class SensorGyroscope(private val sensorManager: SensorManager) : SensorEventLis
     }
 }
 
-class SensorAccelerometer(private val sensorManager: SensorManager) : SensorEventListener {
+class SensorAccelerometer(private val sensorManager: SensorManager,
+                          private val sensorsCollector: SensorsCollector) : SensorEventListener {
 
-    // Define variables to store the sensor manager and the gyroscope sensor
+    // Define variables to store the sensor manager and the accelerometer sensor
     private val accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
-    // Implement the onSensorChanged method to handle gyroscope sensor events
+    // Implement the onSensorChanged method to handle accelerometer sensor events
     override fun onSensorChanged(event: SensorEvent) {
-        // Retrieve gyroscope data from the SensorEvent object
+        // Retrieve accelerometer data from the SensorEvent object
         val x = event.values[0]
         val y = event.values[1]
         val z = event.values[2]
 
         val magnitude = sqrt(((x.pow(2)) + (y.pow(2)) + (z.pow(2))).toDouble())
-        SensorsCollector.store_accelerator_sample(event.timestamp, magnitude)
-        // Do something with the gyroscope data
-        // For example, log the gyroscope data to the console
+        sensorsCollector.storeAcceleratorSample(magnitude)
+//        SensorsCollector.store_accelerator_sample(event.timestamp, magnitude)
+        // Do something with the accelerometer data
+        // For example, log the accelerometer data to the console
 //        Log.d("Accelerometer: ", "x=$x y=$y z=$z")
     }
 
     // Implement the onAccuracyChanged method to handle accelerometer sensor accuracy changes
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        // Do something when the gyroscope sensor accuracy changes
+        // Do something when the accelerometer sensor accuracy changes
     }
 
-    // Register the accelerometer sensor listener when the GyroscopeManager object is created
+    // Register the accelerometer sensor listener when the AccelerometerManager object is created
     init {
         sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
-    // Register the gyroscope sensor listener when the GyroscopeManager object is created
+    // Register the accelerometer sensor listener when the AccelerometerManager object is created
     fun start() {
         sensorManager.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
-    // Unregister the gyroscope sensor listener when the GyroscopeManager object is destroyed
+    // Unregister the accelerometer sensor listener when the AccelerometerManager object is destroyed
+    fun stop() {
+        sensorManager.unregisterListener(this)
+    }
+}
+
+class SensorMagneticField(private val sensorManager: SensorManager,
+                         private val sensorsCollector: SensorsCollector) : SensorEventListener {
+
+    // Define variables to store the sensor manager and the magneticField sensor
+    private val magneticFieldSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+
+    // Implement the onSensorChanged method to handle magneticField sensor events
+    override fun onSensorChanged(event: SensorEvent) {
+        // Retrieve magneticField data from the SensorEvent object
+        val x = event.values[0]
+        val y = event.values[1]
+        val z = event.values[2]
+
+        val magnitude = sqrt(((x.pow(2)) + (y.pow(2)) + (z.pow(2))).toDouble())
+        sensorsCollector.storeMagneticFieldSample(magnitude)
+//        SensorsCollector.store_accelerator_sample(event.timestamp, magnitude)
+        // Do something with the accelerometer data
+        // For example, log the accelerometer data to the console
+//        Log.d("Accelerometer: ", "x=$x y=$y z=$z")
+    }
+
+    // Implement the onAccuracyChanged method to handle accelerometer sensor accuracy changes
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+        // Do something when the accelerometer sensor accuracy changes
+    }
+
+    // Register the accelerometer sensor listener when the AccelerometerManager object is created
+    init {
+        sensorManager.registerListener(this, magneticFieldSensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    // Register the accelerometer sensor listener when the AccelerometerManager object is created
+    fun start() {
+        sensorManager.registerListener(this, magneticFieldSensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    // Unregister the accelerometer sensor listener when the AccelerometerManager object is destroyed
     fun stop() {
         sensorManager.unregisterListener(this)
     }
