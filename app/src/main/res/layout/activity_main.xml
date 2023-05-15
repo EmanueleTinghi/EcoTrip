@@ -29,19 +29,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageButton
-            android:id="@+id/recordingButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="300dp"
-            android:layout_marginTop="60dp"
-            android:backgroundTint="@color/light_green"
-            android:src="@drawable/forward"
-            android:visibility="invisible"
-            android:contentDescription="@string/start_recording"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <TextView
             android:id="@+id/emailView"
             android:layout_width="wrap_content"

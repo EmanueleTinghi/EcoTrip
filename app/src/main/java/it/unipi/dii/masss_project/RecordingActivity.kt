@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
@@ -40,6 +41,8 @@ class RecordingActivity : AppCompatActivity() {
 
     private lateinit var meansOfTransportDetected: String
 
+    private lateinit var locationManager :LocationManager
+    private lateinit var locationListener :LocationListener
     private lateinit var startCity: String
     private var startPoint: Location = Location("Start point")
     private var endPoint: Location = Location("End point")
@@ -52,6 +55,9 @@ class RecordingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // to keep screen on
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         // retrieve username from intent
         username = intent.getStringExtra("username").toString()
 
@@ -62,6 +68,8 @@ class RecordingActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         // initialize firebase firestore
         db = FirebaseFirestore.getInstance()
+
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         // add welcome text view
         val welcomeTextView: TextView = binding.welcomeTextView
@@ -194,12 +202,11 @@ class RecordingActivity : AppCompatActivity() {
     }
 
     private fun getLocation(progress: StringBuilder) {
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         // get the application context
         val context = this
 
-        val locationListener = object : LocationListener {
+        locationListener = object : LocationListener {
             @Deprecated("Deprecated in Java")
             override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
 
@@ -268,8 +275,8 @@ class RecordingActivity : AppCompatActivity() {
                                 for(document in documents) {
                                     val docRef = document.reference
                                     docRef.update(fieldPath, increment)
-                                        .addOnSuccessListener { Log.d(TAG, "Incremented $fieldPath value") }
-                                        .addOnFailureListener { e -> Log.w(TAG, "Error incrementing $fieldPath value", e) }
+                                        .addOnSuccessListener { Log.d(TAG, "Incremented $fieldPath value of aggregateResults collection") }
+                                        .addOnFailureListener { e -> Log.w(TAG, "Error incrementing $fieldPath value of aggregateResults collection", e) }
 
                                 }
                             }
@@ -293,38 +300,33 @@ class RecordingActivity : AppCompatActivity() {
                             userRef.get()
                                 .addOnSuccessListener { document ->
                                     if (document.data?.containsKey("results") == true) {
-                                        val results = document.data?.get("results")
-                                        val userResults: List<AggregateResults> = if (results is List<*>) {
-                                            results.filterIsInstance<AggregateResults>()
+                                        val results = document.data?.get("results") as HashMap<*, *>
+
+                                        // get aggregate user results for start city, if any
+                                        if (results.containsKey(startCity)) {
+                                            // user have aggregate results for start city -> update aggregate results
+                                            val increment = FieldValue.increment(1)
+                                            val fieldPath = "results.$startCity." + initializeFieldPath()
+                                            println("path: $fieldPath")
+                                            val docRef = document.reference
+                                            docRef.update(fieldPath, increment)
+                                                .addOnSuccessListener { Log.d(TAG, "Incremented $fieldPath value of user collection") }
+                                                .addOnFailureListener { e -> Log.w(TAG, "Error incrementing $fieldPath value of user collection", e) }
                                         } else {
-                                            emptyList()
-                                        }
-                                        var check = false
-                                        userResults.forEach { result ->
-                                            if(result.city == startCity) {
-                                                // user have aggregate results for start city -> update aggregate results
-                                                check = true
-                                                val increment = FieldValue.increment(1)
-                                                val fieldPath = initializeFieldPath()
-                                                val docRef = document.reference
-                                                docRef.update(fieldPath, increment)
-                                                    .addOnSuccessListener { Log.d(TAG, "Incremented $fieldPath value") }
-                                                    .addOnFailureListener { e -> Log.w(TAG, "Error incrementing $fieldPath value", e) }
-                                            }
-                                        }
-                                        if(!check) {
-                                            // user have no aggregate results for start city -> insert new aggregate results in results list
+                                            // user have no aggregate results for start city -> insert new aggregate results in results map
                                             val aggregateResults = initializeAggregateResults()
                                             val docRef = document.reference
-                                            docRef.update("results", FieldValue.arrayUnion(aggregateResults))
-                                                .addOnSuccessListener { Log.d(TAG, "Added new result in results list") }
-                                                .addOnFailureListener { e -> Log.w(TAG, "Error adding new result in results list", e) }
-
+                                            docRef.update("results.$startCity", aggregateResults)
+                                                .addOnSuccessListener { Log.d(TAG, "Added new aggregate results for new city in user collection") }
+                                                .addOnFailureListener { e -> Log.w(TAG, "Error adding new aggregate results for new city in user collection", e) }
                                         }
                                     } else {
                                         // the user haven't any aggregate results yet -> create results field
                                         val aggregateResults = initializeAggregateResults()
-                                        val results = listOf(aggregateResults)
+                                        val results = hashMapOf(
+                                            startCity to aggregateResults
+                                        )
+                                        // val results = listOf(aggregateResults)
                                         val docRef = document.reference
                                         docRef.update("results",results)
                                             .addOnSuccessListener { Log.d(TAG, "Results added to user document") }
