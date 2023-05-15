@@ -69,6 +69,7 @@ class RecordingActivity : AppCompatActivity() {
         // initialize firebase firestore
         db = FirebaseFirestore.getInstance()
 
+        // initialize location manager
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         // add welcome text view
@@ -100,7 +101,7 @@ class RecordingActivity : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         } else {
-            val message = "You hae to stop recording first"
+            val message = "You have to stop recording first"
             val duration = Toast.LENGTH_LONG
             val toast = Toast.makeText(this, message, duration)
             toast.show()
@@ -292,7 +293,6 @@ class RecordingActivity : AppCompatActivity() {
                         val currentUser = auth.currentUser
                         // Retrieve the user ID
                         val userID = currentUser?.uid
-
                         if (userID != null) {
                             // retrieve user document
                             val userRef = db.collection("users").document(userID)
@@ -307,7 +307,6 @@ class RecordingActivity : AppCompatActivity() {
                                             // user have aggregate results for start city -> update aggregate results
                                             val increment = FieldValue.increment(1)
                                             val fieldPath = "results.$startCity." + initializeFieldPath()
-                                            println("path: $fieldPath")
                                             val docRef = document.reference
                                             docRef.update(fieldPath, increment)
                                                 .addOnSuccessListener { Log.d(TAG, "Incremented $fieldPath value of user collection") }
@@ -341,7 +340,6 @@ class RecordingActivity : AppCompatActivity() {
                                     toast.show()
                                 }
                         }
-
                     }
                     else -> {
                         // intermediate point
@@ -568,7 +566,6 @@ class RecordingActivity : AppCompatActivity() {
                 "walking" -> fieldPath = "travelDistances.range(>10km).walking"
             }
         }
-
         return fieldPath
     }
 
