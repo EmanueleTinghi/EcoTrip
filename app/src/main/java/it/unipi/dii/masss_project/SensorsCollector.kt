@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.util.Log
 import com.google.firebase.firestore.util.FileUtil
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
+//import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
 import org.tensorflow.lite.Interpreter
 import java.io.FileInputStream
 import java.nio.ByteBuffer
@@ -20,7 +20,7 @@ import kotlin.math.sqrt
 
 class SensorsCollector(applicationContext: Context) {
     private val assetManager: AssetManager
-    private val modelPath = "RF83.model"    // path from assets folder
+    private val modelPath = "random_forest.pkl"//"RF83.model"    // path from assets folder
     private val interpreter: MappedByteBuffer
 
     private val sensorsFeatures = mutableListOf<Double>()
@@ -51,13 +51,15 @@ class SensorsCollector(applicationContext: Context) {
 
     fun classify(): String? {
         println("classify()")
-        println("features: $sensorsFeatures")
-        println("accelerometer: $accelerometerSamples")
-        println("gyroscope: $gyroscopeSamples")
-        println("magneticField: $magneticFieldSamples")
+//        println("features: $sensorsFeatures")
+//        println("accelerometer: $accelerometerSamples")
+//        println("gyroscope: $gyroscopeSamples")
+//        println("magneticField: $magneticFieldSamples")
         lockAccelerometer.lock()
         try {
-            sensorsFeatures.addAll(extractFeatures(accelerometerSamples))
+            Log.d("collector", "extract accelerometer")
+//            sensorsFeatures.addAll(extractFeatures(accelerometerSamples))
+            extractFeatures(accelerometerSamples)
             accelerometerSamples.clear()
         } finally {
             lockAccelerometer.unlock()
@@ -65,7 +67,9 @@ class SensorsCollector(applicationContext: Context) {
 
         lockGyroscope.lock()
         try {
-            sensorsFeatures.addAll(extractFeatures(gyroscopeSamples))
+            Log.d("collector", "extract gyroscope")
+//            sensorsFeatures.addAll(extractFeatures(gyroscopeSamples))
+            extractFeatures(gyroscopeSamples)
             gyroscopeSamples.clear()
         } finally {
             lockGyroscope.unlock()
@@ -73,15 +77,20 @@ class SensorsCollector(applicationContext: Context) {
 
         lockMagneticField.lock()
         try {
-            sensorsFeatures.addAll(extractFeatures(magneticFieldSamples))
+            Log.d("collector", "extract magnetic field")
+//            sensorsFeatures.addAll(extractFeatures(magneticFieldSamples))
+            extractFeatures(magneticFieldSamples)
             magneticFieldSamples.clear()
         } finally {
             lockMagneticField.unlock()
         }
+        println("features: $sensorsFeatures")
 
         val result = interpreter.run { inputCast() }
         val byteArray = ByteArray(result.remaining())
         result.get(byteArray)
+        Log.d("collector", result.toString())
+        Log.d("collector", byteArray.toString())
         val label = Base64.getEncoder().encodeToString(byteArray)
         println("label trip: $label")
         return label
@@ -96,19 +105,23 @@ class SensorsCollector(applicationContext: Context) {
         sensorsFeatures.clear()
         return byteBuffer
     }
-    private fun extractFeatures(sampleList: MutableList<Double>): MutableList<Double> {
+    private fun extractFeatures(sampleList: MutableList<Double>) {  //}: MutableList<Double> {
         val mean = sampleList.average()
         val min = sampleList.min()
         val max = sampleList.max()
         val squaredDifferences = sampleList.map { (it - mean).pow(2) }
         val meanOfSquaredDifferences = squaredDifferences.average()
         val stDev= sqrt(meanOfSquaredDifferences)
+        sensorsFeatures.add(mean)
+        sensorsFeatures.add(min)
+        sensorsFeatures.add(max)
+        sensorsFeatures.add(stDev)
 //        sensorsFeatures.addAll()
-        return mutableListOf(mean, min, max, stDev)
+//        return mutableListOf(mean, min, max, stDev)
     }
 
     fun storeAcceleratorSample(magnitude: Double) {
-        Log.d("collector", "storeAccelerometer")
+//        Log.d("collector", "storeAccelerometer")
         lockAccelerometer.lock()
         try {
             accelerometerSamples.add(magnitude)
@@ -118,7 +131,7 @@ class SensorsCollector(applicationContext: Context) {
     }
 
     fun storeGyroscopeSample(magnitude: Double) {
-        Log.d("collector", "storeGyroscope")
+//        Log.d("collector", "storeGyroscope")
         lockGyroscope.lock()
         try {
             gyroscopeSamples.add(magnitude)
@@ -128,7 +141,7 @@ class SensorsCollector(applicationContext: Context) {
     }
 
     fun storeMagneticFieldSample(magnitude: Double) {
-        Log.d("collector", "storeMagneticField")
+//        Log.d("collector", "storeMagneticField")
         lockMagneticField.lock()
         try {
             magneticFieldSamples.add(magnitude)
