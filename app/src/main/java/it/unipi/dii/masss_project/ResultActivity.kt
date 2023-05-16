@@ -4,13 +4,10 @@ import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -154,12 +151,18 @@ class Schedule1Fragment : Fragment() {
 
                                 val likeImageView = binding.likeImageView
                                 likeImageView.visibility = View.VISIBLE
+
+                                val dislikeImageView = binding.dislikeImageView
+                                dislikeImageView.visibility = View.INVISIBLE
                             }
                             "Bad! You are below the general average." -> {
                                 resultTextView.setTextColor(Color.RED)
 
                                 val dislikeImageView = binding.dislikeImageView
                                 dislikeImageView.visibility = View.VISIBLE
+
+                                val likeImageView = binding.likeImageView
+                                likeImageView.visibility = View.INVISIBLE
                             }
                             else -> {
                                 resultTextView.setTextColor(Color.RED)
@@ -242,6 +245,9 @@ class Schedule2Fragment : Fragment() {
 
                                 val likeImageView = binding.likeImageView
                                 likeImageView.visibility = View.VISIBLE
+
+                                val dislikeImageView = binding.dislikeImageView
+                                dislikeImageView.visibility = View.INVISIBLE
                             }
 
                             "Bad! You are below the general average." -> {
@@ -249,6 +255,9 @@ class Schedule2Fragment : Fragment() {
 
                                 val dislikeImageView = binding.dislikeImageView
                                 dislikeImageView.visibility = View.VISIBLE
+
+                                val likeImageView = binding.likeImageView
+                                likeImageView.visibility = View.INVISIBLE
                             } else -> {
                                 resultTextView.setTextColor(Color.RED)
 
@@ -328,12 +337,18 @@ class Schedule3Fragment : Fragment() {
 
                                 val likeImageView = binding.likeImageView
                                 likeImageView.visibility = View.VISIBLE
+
+                                val dislikeImageView = binding.dislikeImageView
+                                dislikeImageView.visibility = View.INVISIBLE
                             }
                             "Bad! You are below the general average." -> {
                                 resultTextView.setTextColor(Color.RED)
 
                                 val dislikeImageView = binding.dislikeImageView
                                 dislikeImageView.visibility = View.VISIBLE
+
+                                val likeImageView = binding.likeImageView
+                                likeImageView.visibility = View.INVISIBLE
                             }
                             else -> {
                                 resultTextView.setTextColor(Color.RED)
@@ -415,12 +430,18 @@ class Schedule4Fragment : Fragment() {
 
                                 val likeImageView = binding.likeImageView
                                 likeImageView.visibility = View.VISIBLE
+
+                                val dislikeImageView = binding.dislikeImageView
+                                dislikeImageView.visibility = View.INVISIBLE
                             }
                             "Bad! You are below the general average." -> {
                                 resultTextView.setTextColor(Color.RED)
 
                                 val dislikeImageView = binding.dislikeImageView
                                 dislikeImageView.visibility = View.VISIBLE
+
+                                val likeImageView = binding.likeImageView
+                                likeImageView.visibility = View.INVISIBLE
                             }
                             else -> {
                                 resultTextView.setTextColor(Color.RED)
