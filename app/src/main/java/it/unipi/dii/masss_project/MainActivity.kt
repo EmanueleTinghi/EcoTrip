@@ -39,19 +39,6 @@ class MainActivity : AppCompatActivity() {
         val button: Button = binding.loginButton
         button.setOnClickListener{onLoginAttempt()}
 
-        val startButton: ImageButton = binding.recordingButton
-        startButton.setOnClickListener{onStartRecordingButtonClick()}
-
-    }
-
-    private fun onStartRecordingButtonClick() {
-        val currentUser = auth.currentUser
-        if(currentUser != null){
-            val email: String? = currentUser.email
-            if(email!= null){
-                startRecordingActivity(email)
-            }
-        }
     }
 
     private fun onLoginAttempt() {
@@ -98,19 +85,6 @@ class MainActivity : AppCompatActivity() {
                 val toast = Toast.makeText(this, message, duration)
                 toast.show()
             }
-        } else {
-            // user logout
-            auth.signOut()
-
-            // clear input text editor
-            binding.inputEmail.setText("")
-            binding.inputPassword.setText("")
-            binding.inputEmail.requestFocus()
-
-            "Login".also { binding.loginButton.text = it }
-
-            val startRecordingButton: ImageButton = binding.recordingButton
-            startRecordingButton.visibility = View.INVISIBLE
         }
 
     }
@@ -134,14 +108,6 @@ class MainActivity : AppCompatActivity() {
         val prefs = getPreferences(MODE_PRIVATE)
         binding.inputPassword.setText(prefs.getString("password", ""))
         binding.inputEmail.setText(prefs.getString("email", ""))
-
-        if(auth.currentUser != null) {
-            // the user is logged in - view logout button
-            "Logout".also { binding.loginButton.text = it }
-
-            val startRecordingButton: ImageButton = binding.recordingButton
-            startRecordingButton.visibility = View.VISIBLE
-        }
     }
 
     override fun onDestroy() {
