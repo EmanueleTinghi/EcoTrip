@@ -405,7 +405,7 @@ class RecordingActivity : AppCompatActivity() {
                         }
 
                         val green = if (userWeightedAverage >= generalWeightedAverage){
-                            "Great! You are above the general average."
+                            "Great! You are very green, keep it up!."
                         } else {
                             "Bad! You are below the general average."
                         }
