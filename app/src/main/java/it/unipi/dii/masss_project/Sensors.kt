@@ -87,36 +87,3 @@ class SensorAccelerometer(private val sensorManager: SensorManager) : SensorEven
         sensorManager.unregisterListener(this)
     }
 }
-
-class SensorMicrophone(private val context: Context, private val activity: RecordingActivity, private val sensorManager: SensorManager) {
-    private var microphone: MediaRecorder? = null
-    fun start(){
-        if(checkPermission()){
-            val savePath = Environment.getExternalStorageDirectory().toString() +"/travelAudioRecording.3gp"
-            println("Here")
-            microphone!!.setAudioSource(MediaRecorder.AudioSource.MIC)
-            println("Here")
-            microphone!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-            println("Here")
-            microphone!!.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-            println("Here")
-            microphone!!.setOutputFile(savePath)
-            println("Here")
-            microphone!!.prepare()
-            println("Here")
-            microphone!!.start()
-            println("Here")
-        }else{
-            ActivityCompat.requestPermissions(activity, arrayOf(android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
-        }
-    }
-
-    fun stop(){
-        microphone!!.stop()
-    }
-
-    private fun checkPermission():Boolean{
-        return (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
-                && (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
-    }
-}

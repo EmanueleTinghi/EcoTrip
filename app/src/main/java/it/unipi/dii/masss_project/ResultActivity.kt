@@ -1,13 +1,19 @@
 package it.unipi.dii.masss_project
 
 import android.content.Intent
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -140,6 +146,32 @@ class Schedule1Fragment : Fragment() {
                         } else {
                             "you haven't done any <1km trips yet".also { resultTextView.text = it }
                         }
+
+                        when (result) {
+                            "Great! You are very green, keep it up!" -> {
+                                val resolvedColor = ContextCompat.getColor(requireContext(), R.color.primary)
+                                resultTextView.setTextColor(resolvedColor)
+
+                                val likeImageView = binding.likeImageView
+                                likeImageView.visibility = View.VISIBLE
+                            }
+                            "Bad! You are below the general average." -> {
+                                resultTextView.setTextColor(Color.RED)
+
+                                val dislikeImageView = binding.dislikeImageView
+                                dislikeImageView.visibility = View.VISIBLE
+                            }
+                            else -> {
+                                resultTextView.setTextColor(Color.RED)
+
+                                val likeImageView = binding.likeImageView
+                                likeImageView.visibility = View.INVISIBLE
+
+                                val dislikeImageView = binding.dislikeImageView
+                                dislikeImageView.visibility = View.INVISIBLE
+                            }
+                        }
+
                         resultTextView.visibility = View.VISIBLE
 
                     } else {
@@ -202,6 +234,31 @@ class Schedule2Fragment : Fragment() {
                         } else {
                             "you haven't done any 1-5km trips yet".also { resultTextView.text = it }
                         }
+
+                        when (result) {
+                            "Great! You are very green, keep it up!" -> {
+                                val resolvedColor = ContextCompat.getColor(requireContext(), R.color.primary)
+                                resultTextView.setTextColor(resolvedColor)
+
+                                val likeImageView = binding.likeImageView
+                                likeImageView.visibility = View.VISIBLE
+                            }
+
+                            "Bad! You are below the general average." -> {
+                                resultTextView.setTextColor(Color.RED)
+
+                                val dislikeImageView = binding.dislikeImageView
+                                dislikeImageView.visibility = View.VISIBLE
+                            } else -> {
+                                resultTextView.setTextColor(Color.RED)
+
+                                val likeImageView = binding.likeImageView
+                                likeImageView.visibility = View.INVISIBLE
+
+                                val dislikeImageView = binding.dislikeImageView
+                                dislikeImageView.visibility = View.INVISIBLE
+                            }
+                        }
                         resultTextView.visibility = View.VISIBLE
                     } else {
                         // User document does not exist
@@ -263,6 +320,32 @@ class Schedule3Fragment : Fragment() {
                         } else {
                             "you haven't done any 5-10km trips yet".also { resultTextView.text = it }
                         }
+
+                        when (result) {
+                            "Great! You are very green, keep it up!" -> {
+                                val resolvedColor = ContextCompat.getColor(requireContext(), R.color.primary)
+                                resultTextView.setTextColor(resolvedColor)
+
+                                val likeImageView = binding.likeImageView
+                                likeImageView.visibility = View.VISIBLE
+                            }
+                            "Bad! You are below the general average." -> {
+                                resultTextView.setTextColor(Color.RED)
+
+                                val dislikeImageView = binding.dislikeImageView
+                                dislikeImageView.visibility = View.VISIBLE
+                            }
+                            else -> {
+                                resultTextView.setTextColor(Color.RED)
+
+                                val likeImageView = binding.likeImageView
+                                likeImageView.visibility = View.INVISIBLE
+
+                                val dislikeImageView = binding.dislikeImageView
+                                dislikeImageView.visibility = View.INVISIBLE
+                            }
+                        }
+
                         resultTextView.visibility = View.VISIBLE
                     } else {
                         // User document does not exist
@@ -324,6 +407,32 @@ class Schedule4Fragment : Fragment() {
                         } else {
                             "you haven't done any >10km trips yet".also { resultTextView.text = it }
                         }
+
+                        when (result) {
+                            "Great! You are very green, keep it up!" -> {
+                                val resolvedColor = ContextCompat.getColor(requireContext(), R.color.primary)
+                                resultTextView.setTextColor(resolvedColor)
+
+                                val likeImageView = binding.likeImageView
+                                likeImageView.visibility = View.VISIBLE
+                            }
+                            "Bad! You are below the general average." -> {
+                                resultTextView.setTextColor(Color.RED)
+
+                                val dislikeImageView = binding.dislikeImageView
+                                dislikeImageView.visibility = View.VISIBLE
+                            }
+                            else -> {
+                                resultTextView.setTextColor(Color.RED)
+
+                                val likeImageView = binding.likeImageView
+                                likeImageView.visibility = View.INVISIBLE
+
+                                val dislikeImageView = binding.dislikeImageView
+                                dislikeImageView.visibility = View.INVISIBLE
+                            }
+                        }
+
                         resultTextView.visibility = View.VISIBLE
                     } else {
                         // User document does not exist
