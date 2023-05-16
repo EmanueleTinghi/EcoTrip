@@ -38,7 +38,6 @@ class MainActivity : AppCompatActivity() {
         // add listener for loginButton
         val button: Button = binding.loginButton
         button.setOnClickListener{onLoginAttempt()}
-
     }
 
     private fun onLoginAttempt() {
@@ -86,7 +85,6 @@ class MainActivity : AppCompatActivity() {
                 toast.show()
             }
         }
-
     }
 
     override fun onStop() {
@@ -166,7 +164,11 @@ class MainActivity : AppCompatActivity() {
                     val userData = hashMapOf(
                         "username" to username,
                         "email" to email,
-                        "password" to password
+                        "password" to password,
+                        "last_<1km" to "",
+                        "last_1-5km" to "",
+                        "last_5-10km" to "",
+                        "last_>10km" to ""
                     )
                     userRef.set(userData)
 
