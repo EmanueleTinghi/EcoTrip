@@ -138,10 +138,10 @@ class Schedule1Fragment : Fragment() {
                         // add text view to see result
                         val resultTextView: TextView = binding.textViewSchedule1
 
-                        if( result!= null) {
+                        if( result != null && result != "") {
                             "$result".also { resultTextView.text = it }
                         } else {
-                            "you haven't done any <1km trips yet".also { resultTextView.text = it }
+                            "You haven't done any <1km trips yet".also { resultTextView.text = it }
                         }
 
                         when (result) {
@@ -232,10 +232,10 @@ class Schedule2Fragment : Fragment() {
                         // add text view to see result
                         val resultTextView: TextView = binding.textViewSchedule2
 
-                        if( result!= null) {
+                        if( result != null && result != "") {
                             "$result".also { resultTextView.text = it }
                         } else {
-                            "you haven't done any 1-5km trips yet".also { resultTextView.text = it }
+                            "You haven't done any 1-5km trips yet".also { resultTextView.text = it }
                         }
 
                         when (result) {
@@ -324,10 +324,10 @@ class Schedule3Fragment : Fragment() {
                         // add text view to see result
                         val resultTextView: TextView = binding.textViewSchedule3
 
-                        if( result!= null) {
+                        if( result != null && result != "") {
                             "$result".also { resultTextView.text = it }
                         } else {
-                            "you haven't done any 5-10km trips yet".also { resultTextView.text = it }
+                            "You haven't done any 5-10km trips yet".also { resultTextView.text = it }
                         }
 
                         when (result) {
@@ -417,10 +417,10 @@ class Schedule4Fragment : Fragment() {
                         // add text view to see result
                         val resultTextView: TextView = binding.textViewSchedule4
 
-                        if( result!= null) {
+                        if( result != null && result != "") {
                             "$result".also { resultTextView.text = it }
                         } else {
-                            "you haven't done any >10km trips yet".also { resultTextView.text = it }
+                            "You haven't done any >10km trips yet".also { resultTextView.text = it }
                         }
 
                         when (result) {
