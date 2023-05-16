@@ -59,6 +59,9 @@ android {
 
 dependencies {
 
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation files('lib/weka-stable-3.8.1-SNAPSHOT.jar')
     implementation 'androidx.core:core-ktx:1.10.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
@@ -82,7 +85,7 @@ dependencies {
 //    implementation 'com.google.firebase:firebase-ml-modeldownloader-ktx'
 //
 //    // Also add the dependency for the TensorFlow Lite library and specify its version
-    implementation 'org.tensorflow:tensorflow-lite:2.3.0'
+//    implementation 'org.tensorflow:tensorflow-lite:2.3.0'
 //
 //    implementation 'org.tensorflow:tensorflow-lite-task-vision-play-services:0.4.2'
 //    implementation 'com.google.android.gms:play-services-tflite-gpu:16.1.0'

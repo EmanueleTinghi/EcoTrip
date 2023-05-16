@@ -18,14 +18,9 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
-import org.tensorflow.lite.Interpreter
-import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
-import java.nio.MappedByteBuffer
-import java.nio.channels.FileChannel
 
-import org.tensorflow.lite.TensorFlowLite as tfl
 
 
 class MainActivity : AppCompatActivity() {

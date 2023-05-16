@@ -37,19 +37,12 @@ class RecordingActivity : AppCompatActivity() {
     private var gyroscope: SensorGyroscope? = null
     private var accelerometer: SensorAccelerometer? = null
     private var magneticField: SensorMagneticField? = null
-//    private var microphone: SensorMicrophone? = null
 
     private var startPoint: Location = Location("Start point")
     private var endPoint: Location = Location("End point")
 
     private val distances = mutableListOf<Float>()
     private var finalDistance = 0.0f
-
-
-    //    private val assetManager = resources.assets //applicationContext.assets
-//    private lateinit var assetManager: AssetManager
-//    private val modelPath = "random_forest.pkl" //""model.model"// "tflite_model1.lite" //"ei-verto-project-1-classifier-tensorflow-lite-int8-quantized-model.lite"
-//    private lateinit var interpreter:MappedByteBuffer //= loadModelFile(assetManager, modelPath)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

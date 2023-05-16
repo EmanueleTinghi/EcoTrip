@@ -1,29 +1,28 @@
 package it.unipi.dii.masss_project
 
 import android.content.Context
-import android.content.res.AssetManager
 import android.util.Log
-import com.google.firebase.firestore.util.FileUtil
-//import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
-import org.tensorflow.lite.Interpreter
-import java.io.FileInputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.MappedByteBuffer
-import java.nio.channels.FileChannel
-import java.util.Base64
+import weka.classifiers.trees.J48
+import weka.core.Attribute
+import weka.core.DenseInstance
+import weka.core.FastVector
+import weka.core.Instance
+import weka.core.Instances
+import weka.core.SerializationHelper
 import java.util.Timer
 import java.util.TimerTask
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+
 class SensorsCollector(applicationContext: Context) {
-    private val assetManager: AssetManager
-    private val modelPath = "random_forest.pkl"//"RF83.model"    // path from assets folder
-    private val interpreter: MappedByteBuffer
+    private val modelPath = "J48.model"//"RF83.model"    // path from assets folder
+    private lateinit var classifier: J48
 
     private val sensorsFeatures = mutableListOf<Double>()
+
+    private lateinit var data: Instances
 
     private val accelerometerSamples = mutableListOf<Double>()
     private val gyroscopeSamples = mutableListOf<Double>()
@@ -36,30 +35,63 @@ class SensorsCollector(applicationContext: Context) {
     private val timer = Timer()
 
     init {
-        assetManager = applicationContext.assets
-        println("model path $modelPath")
-        interpreter = loadModelFile(assetManager, modelPath)
-    }
-    private fun loadModelFile(assetManager: AssetManager, modelPath: String): MappedByteBuffer {
-        val fileDescriptor = assetManager.openFd(modelPath)
-        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
-        val fileChannel = inputStream.channel
-        val startOffset = fileDescriptor.startOffset
-        val declaredLength = fileDescriptor.declaredLength
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
+        classifier = J48()
+        try {
+            classifier = SerializationHelper.read(
+                applicationContext.assets.open("J48.model")
+            ) as J48
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        var labels = FastVector<String>()
+
+        labels.addElement("Car")
+        labels.addElement("Walking")
+        labels.addElement("Bus")
+        labels.addElement("Train")
+        val cls = Attribute("class", labels)
+
+        val attr1 = Attribute("android.sensor.accelerometer_mean")
+        val attr2 = Attribute("android.sensor.accelerometer_min")
+        val attr3 = Attribute("android.sensor.accelerometer_max")
+        val attr4 = Attribute("android.sensor.accelerometer_std")
+        val attr5 = Attribute("android.sensor.gyroscope_mean")
+        val attr6 = Attribute("android.sensor.gyroscope_min")
+        val attr7 = Attribute("android.sensor.gyroscope_max")
+        val attr8 = Attribute("android.sensor.gyroscope_std")
+        val attr9 = Attribute("android.sensor.magnetic_field_mean")
+        val attr10 = Attribute("android.sensor.magnetic_field_min")
+        val attr11 = Attribute("android.sensor.magnetic_field_max")
+        val attr12 = Attribute("android.sensor.magnetic_field_std")
+
+        val attributes: FastVector<Attribute> = FastVector<Attribute>()
+        attributes.addElement(attr1)
+        attributes.addElement(attr2)
+        attributes.addElement(attr3)
+        attributes.addElement(attr4)
+        attributes.addElement(attr5)
+        attributes.addElement(attr6)
+        attributes.addElement(attr7)
+        attributes.addElement(attr8)
+        attributes.addElement(attr9)
+        attributes.addElement(attr10)
+        attributes.addElement(attr11)
+        attributes.addElement(attr12)
+        attributes.addElement(cls)
+
+        data = Instances("toClassify", attributes, 0)
+
+        data.setClassIndex(data.numAttributes() - 1)
+
     }
 
     fun classify(): String? {
         println("classify()")
-//        println("features: $sensorsFeatures")
-//        println("accelerometer: $accelerometerSamples")
-//        println("gyroscope: $gyroscopeSamples")
-//        println("magneticField: $magneticFieldSamples")
+        val values = DoubleArray(data.numAttributes())
         lockAccelerometer.lock()
         try {
             Log.d("collector", "extract accelerometer")
-//            sensorsFeatures.addAll(extractFeatures(accelerometerSamples))
-            extractFeatures(accelerometerSamples)
+            extractFeatures(accelerometerSamples, values, 0)
             accelerometerSamples.clear()
         } finally {
             lockAccelerometer.unlock()
@@ -68,8 +100,7 @@ class SensorsCollector(applicationContext: Context) {
         lockGyroscope.lock()
         try {
             Log.d("collector", "extract gyroscope")
-//            sensorsFeatures.addAll(extractFeatures(gyroscopeSamples))
-            extractFeatures(gyroscopeSamples)
+            extractFeatures(gyroscopeSamples, values, 1)
             gyroscopeSamples.clear()
         } finally {
             lockGyroscope.unlock()
@@ -78,46 +109,33 @@ class SensorsCollector(applicationContext: Context) {
         lockMagneticField.lock()
         try {
             Log.d("collector", "extract magnetic field")
-//            sensorsFeatures.addAll(extractFeatures(magneticFieldSamples))
-            extractFeatures(magneticFieldSamples)
+            extractFeatures(magneticFieldSamples, values, 2)
             magneticFieldSamples.clear()
         } finally {
             lockMagneticField.unlock()
         }
-        println("features: $sensorsFeatures")
+        val instance: DenseInstance = DenseInstance(12)
+        instance.copy(values)
 
-        val result = interpreter.run { inputCast() }
-        val byteArray = ByteArray(result.remaining())
-        result.get(byteArray)
-        Log.d("collector", result.toString())
-        Log.d("collector", byteArray.toString())
-        val label = Base64.getEncoder().encodeToString(byteArray)
-        println("label trip: $label")
-        return label
+        data.add(instance)
+
+        val ciao = classifier.classifyInstance(data[0])
+        Log.d("Classified as", ciao.toString())
+        return "We";
     }
 
-    private fun inputCast(): ByteBuffer {
-        val byteBuffer = ByteBuffer.allocateDirect(sensorsFeatures.size * 8)
-        byteBuffer.order(ByteOrder.nativeOrder())
-        for (value in sensorsFeatures) {
-            byteBuffer.putDouble(value)
-        }
-        sensorsFeatures.clear()
-        return byteBuffer
-    }
-    private fun extractFeatures(sampleList: MutableList<Double>) {  //}: MutableList<Double> {
+
+    private fun extractFeatures(sampleList: MutableList<Double>, instance: DoubleArray , index: Int){  //}: MutableList<Double> {
         val mean = sampleList.average()
         val min = sampleList.min()
         val max = sampleList.max()
         val squaredDifferences = sampleList.map { (it - mean).pow(2) }
         val meanOfSquaredDifferences = squaredDifferences.average()
         val stDev= sqrt(meanOfSquaredDifferences)
-        sensorsFeatures.add(mean)
-        sensorsFeatures.add(min)
-        sensorsFeatures.add(max)
-        sensorsFeatures.add(stDev)
-//        sensorsFeatures.addAll()
-//        return mutableListOf(mean, min, max, stDev)
+        instance[index * 4] = mean
+        instance[index * 4 + 1] = min
+        instance[index * 4 + 2] = max
+        instance[index * 4 +  3] = stDev
     }
 
     fun storeAcceleratorSample(magnitude: Double) {
