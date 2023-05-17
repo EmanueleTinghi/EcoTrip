@@ -16,3 +16,5 @@ local.properties
 .idea/
 .idea/gradle.xml
 *.xml
+keras_model/
+*.pkl

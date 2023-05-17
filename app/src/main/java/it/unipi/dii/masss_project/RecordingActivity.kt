@@ -9,7 +9,6 @@ import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -18,6 +17,7 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -28,15 +28,18 @@ import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
 
 class RecordingActivity : AppCompatActivity() {
 
+    private lateinit var sensorsCollector: SensorsCollector
+
     private lateinit var binding: ActivityRecordingBinding
 
     private lateinit var username: String
 
-    private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
-
     private var gyroscope: SensorGyroscope? = null
     private var accelerometer: SensorAccelerometer? = null
+    private var magneticField: SensorMagneticField? = null
+
+    private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
 
     private lateinit var meansOfTransportDetected: String
 
@@ -59,6 +62,7 @@ class RecordingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        sensorsCollector = SensorsCollector(applicationContext)
         // to keep screen on
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -83,7 +87,7 @@ class RecordingActivity : AppCompatActivity() {
 
         // add listener for startButton
         val startButton: Button = binding.startButton
-        startButton.setOnClickListener {onStartAttempt(binding, this) }
+        startButton.setOnClickListener {onStartAttempt(binding) }
 
         // add listener for resultButton
         val resultButton: Button = binding.resultButton
@@ -133,12 +137,17 @@ class RecordingActivity : AppCompatActivity() {
 
             /********************          Accelerometer          ********************/
             //Initialize the accelerometer sensor
-            accelerometer = SensorAccelerometer(sensorManager)
+            accelerometer = SensorAccelerometer(sensorManager, sensorsCollector)
             accelerometer!!.start()
+
+            /********************          MagneticField          ********************/
+            //Initialize the magneticField sensor
+            magneticField = SensorMagneticField(sensorManager, sensorsCollector)
+            magneticField!!.start()
 
             /********************          Gyroscope          ********************/
             //Initialize the gyroscope sensor
-            gyroscope = SensorGyroscope(sensorManager)
+            gyroscope = SensorGyroscope(sensorManager, sensorsCollector)
             gyroscope!!.start()
 
             /****************           GPS              ****************/
@@ -147,12 +156,15 @@ class RecordingActivity : AppCompatActivity() {
             progress.append("Start")
             getLocation(progress)
 
-            /****************           TO-DO              ****************/
-            // todo: usare classificatore per rilevare mezzo di trasporto
+            /****************           Starting collection sampling              ****************/
+            sensorsCollector.startCollection()
 
         } else {
             gyroscope!!.stop()
             accelerometer!!.stop()
+            magneticField!!.stop()
+
+            val classification = sensorsCollector.stopCollection()
 
             // Block the user in this activity until stopped recording
             startedRecording = false
@@ -176,9 +188,6 @@ class RecordingActivity : AppCompatActivity() {
             progress.append("Stop")
             getLocation(progress)
 
-            // todo: passare ad unl'altra pagina che mostra i risultati ottenuti
-            //val intent = Intent(this, ResultActivity::class.java)
-            //startActivity(intent)
         }
 
     }

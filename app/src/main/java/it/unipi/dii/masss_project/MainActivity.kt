@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = DataBindingUtil.setContentView(
             this, R.layout.activity_main)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
@@ -76,8 +77,7 @@ class MainActivity : AppCompatActivity() {
                             errorTextView.visibility = View.VISIBLE
                         }
                     }
-            }
-            else{
+            } else {
                 // Otherwise show error message
                 val message = "Insert email and password, please"
                 val duration = Toast.LENGTH_LONG
@@ -189,5 +189,4 @@ class MainActivity : AppCompatActivity() {
                 }
             }
     }
-
 }
