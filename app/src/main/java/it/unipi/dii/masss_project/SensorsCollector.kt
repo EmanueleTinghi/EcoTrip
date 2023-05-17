@@ -2,7 +2,7 @@ package it.unipi.dii.masss_project
 
 import android.content.Context
 import android.util.Log
-import weka.classifiers.trees.J48
+import weka.classifiers.meta.AdaBoostM1
 import weka.core.Attribute
 import weka.core.DenseInstance
 import weka.core.FastVector
@@ -16,13 +16,11 @@ import kotlin.math.sqrt
 
 
 class SensorsCollector(applicationContext: Context) {
-    private val modelPath = "J48.model"//"RF83.model"    // path from assets folder
-    private lateinit var classifier: J48
+    private val modelPath = "ADABoostJ48.model" // path from assets folder
+    private var classifier: AdaBoostM1
 
-    private val sensorsFeatures = mutableListOf<Double>()
-
-    private lateinit var data: Instances
-    private lateinit var cls: Attribute
+    private var data: Instances
+    private var cls: Attribute
 
     private val accelerometerSamples = mutableListOf<Double>()
     private val gyroscopeSamples = mutableListOf<Double>()
@@ -35,11 +33,11 @@ class SensorsCollector(applicationContext: Context) {
     private val timer = Timer()
 
     init {
-        classifier = J48()
+        classifier = AdaBoostM1()
         try {
             classifier = SerializationHelper.read(
-                applicationContext.assets.open("J48.model")
-            ) as J48
+                applicationContext.assets.open(modelPath)
+            ) as AdaBoostM1
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -119,14 +117,14 @@ class SensorsCollector(applicationContext: Context) {
         //Add instance to classify
         data.add(instance)
 
-        val class_ = classifier.classifyInstance(data[0])
+        val classification = classifier.classifyInstance(data[0])
 
         //Remove features of the classified instance, store the result and delete data safely
         data.removeAt(0)
 
         // Convert the double value back into a string
         // Convert the double value back into a string
-        val predString: String = cls.value(class_.toInt())
+        val predString: String = cls.value(classification.toInt())
 
         Log.d("Classified", predString)
 

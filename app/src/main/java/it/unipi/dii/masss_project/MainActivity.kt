@@ -48,17 +48,6 @@ class MainActivity : AppCompatActivity() {
         val button: Button = binding.loginButton
         button.setOnClickListener{onLoginAttempt()}
         var string: String = ""
-        try {
-            val inputStream: InputStream = assets.open("test_assets.txt")
-            val size: Int = inputStream.available()
-            val buffer = ByteArray(size)
-            inputStream.read(buffer)
-            string = String(buffer)
-
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        println(string)
     }
 
     private fun onLoginAttempt() {
