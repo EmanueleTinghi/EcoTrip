@@ -193,10 +193,11 @@ class SensorsCollector(applicationContext: Context) {
         }, 5000, 5000)
     }
 
-    fun stopCollection(): String? {
+    fun stopCollection(): String {
         timer.cancel()
         Log.d("timer", "stopTimer")
-        return resultClassification.maxByOrNull { it.value}?.key
+        println("result classification ${resultClassification.maxByOrNull { it.value}?.key}")
+        return resultClassification.maxByOrNull { it.value}?.key ?: "None"
     }
 
 }

@@ -50,7 +50,7 @@ class RecordingActivity : AppCompatActivity() {
     private var endPoint: Location = Location("End point")
 
     private val distances = mutableListOf<Float>()
-    private var finalDistance = 0.0f
+    private var finalDistance: Double = 0.0
 
     private var startedRecording: Boolean = false
 
@@ -87,7 +87,7 @@ class RecordingActivity : AppCompatActivity() {
 
         // add listener for startButton
         val startButton: Button = binding.startButton
-        startButton.setOnClickListener {onStartAttempt(binding) }
+        startButton.setOnClickListener {onStartAttempt(binding, this) }
 
         // add listener for resultButton
         val resultButton: Button = binding.resultButton
@@ -164,7 +164,8 @@ class RecordingActivity : AppCompatActivity() {
             accelerometer!!.stop()
             magneticField!!.stop()
 
-            val classification = sensorsCollector.stopCollection()
+            meansOfTransportDetected = sensorsCollector.stopCollection()
+            println("class label $meansOfTransportDetected")
 
             // Block the user in this activity until stopped recording
             startedRecording = false
@@ -180,7 +181,7 @@ class RecordingActivity : AppCompatActivity() {
             toast.show()
 
             // todo: obtain classification results
-            meansOfTransportDetected = "car"
+//            meansOfTransportDetected = classification
 
             // retrieve user current location - end point
             // and calculate distance between start and end points
@@ -257,7 +258,7 @@ class RecordingActivity : AppCompatActivity() {
                         distances.add(distance)
 
                         // calculate final distance
-                        finalDistance = distances.sum()
+                        finalDistance = distances.sum().toDouble()
                         println("FINAL DISTANCE: $finalDistance km")
 
                         // empty distances list
@@ -456,7 +457,7 @@ class RecordingActivity : AppCompatActivity() {
 
     private fun initializeAggregateResults() : AggregateResults {
         lateinit var aggregateResults: AggregateResults
-        if(finalDistance > 0 && finalDistance < 1){
+        if(finalDistance >= 0 && finalDistance < 1){
             when(meansOfTransportDetected){
                 "bus" -> aggregateResults = AggregateResults(
                     city = startCity,
@@ -617,13 +618,23 @@ class RecordingActivity : AppCompatActivity() {
                     )
                 )
             }
+        } else {
+            aggregateResults = AggregateResults(
+                city = startCity,
+                travelDistances = mapOf(
+                    "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                    "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                    "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                    "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                )
+            )
         }
         return aggregateResults
     }
 
     private fun getFinalUserResultToUpdate() : String {
         lateinit var finalResult: String
-        if(finalDistance > 0 && finalDistance < 1){
+        if (finalDistance >= 0 && finalDistance < 1){
             finalResult = "last_<1km"
         } else if(finalDistance >= 1 && finalDistance < 5) {
             finalResult = "last_1-5km"
@@ -631,13 +642,16 @@ class RecordingActivity : AppCompatActivity() {
             finalResult = "last_5-10km"
         } else if(finalDistance >= 10) {
             finalResult = "last_>10km"
+        } else {
+            finalResult = ""
         }
+        println("final distance $finalDistance")
         return finalResult
     }
 
     private fun getRange() : String {
         lateinit var range : String
-        if(finalDistance > 0 && finalDistance < 1){
+        if(finalDistance >= 0 && finalDistance < 1){
             range = "range(<1km)"
         } else if(finalDistance >= 1 && finalDistance < 5) {
             range = "range(1-5km)"
@@ -651,7 +665,7 @@ class RecordingActivity : AppCompatActivity() {
 
     private fun initializeFieldPath() : String {
         lateinit var fieldPath: String
-        if(finalDistance > 0 && finalDistance < 1){
+        if(finalDistance >= 0 && finalDistance < 1){
             when(meansOfTransportDetected){
                 "bus" -> fieldPath = "travelDistances.range(<1km).bus"
                 "car" -> fieldPath = "travelDistances.range(<1km).car"
