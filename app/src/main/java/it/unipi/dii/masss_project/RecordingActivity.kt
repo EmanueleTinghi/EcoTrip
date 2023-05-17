@@ -225,7 +225,10 @@ class RecordingActivity : AppCompatActivity() {
             distances.add(distance)
 
             // calculate final distance
-            finalDistance = distances.sum()
+            finalDistance = if ( distances.sum() < 0 )
+                0.0
+            else
+                distances.sum()
             println("FINAL DISTANCE: $finalDistance km")
 
             // empty distances list
@@ -640,16 +643,6 @@ class RecordingActivity : AppCompatActivity() {
                     )
                 )
             }
-        } else {
-            aggregateResults = AggregateResults(
-                city = startCity,
-                travelDistances = mapOf(
-                    "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
-                    "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
-                    "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
-                    "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
-                )
-            )
         }
         return aggregateResults
     }
