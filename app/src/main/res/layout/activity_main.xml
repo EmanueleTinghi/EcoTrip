@@ -7,25 +7,25 @@
         android:id="@+id/parentLayoutMainActivity"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.5"
+        android:background="@color/light_green"
         tools:context=".MainActivity">
 
         <Button
             android:id="@+id/loginButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="150dp"
-            android:layout_marginTop="512dp"
-            android:layout_marginEnd="150dp"
-            android:alpha="1"
-            android:backgroundTint="@color/red"
+            android:layout_marginStart="130dp"
+            android:layout_marginTop="540dp"
+            android:layout_marginEnd="130dp"
+            android:backgroundTint="@color/green"
             android:fontFamily="@font/oswald_family"
             android:text="@string/login"
             android:textColor="@color/black"
             android:textSize="24sp"
             android:textStyle="bold"
+            app:icon="@drawable/login"
+            app:iconTint="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -46,7 +46,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/inputBoxEmail"
             android:layout_width="300dp"
-            android:layout_height="50dp"
+            android:layout_height="55dp"
             android:layout_marginStart="30dp"
             android:layout_marginTop="300dp"
             android:layout_marginEnd="30dp"
@@ -61,8 +61,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/oswald_family"
                 android:hint="@string/email"
-                android:textColor="@color/black"
-                android:textSize="20sp" />
+                android:textColor="@color/black" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
@@ -82,7 +81,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/inputBoxPassword"
             android:layout_width="300dp"
-            android:layout_height="50dp"
+            android:layout_height="55dp"
             android:layout_marginStart="30dp"
             android:layout_marginTop="410dp"
             android:layout_marginEnd="30dp"
@@ -98,8 +97,7 @@
                 android:fontFamily="@font/oswald_family"
                 android:hint="@string/password"
                 android:inputType="textPassword"
-                android:textColor="@color/black"
-                android:textSize="20sp" />
+                android:textColor="@color/black" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
@@ -109,12 +107,28 @@
             android:layout_marginStart="50dp"
             android:layout_marginTop="472dp"
             android:layout_marginEnd="50dp"
+            android:fontFamily="@font/oswald_family"
+            android:textSize="18sp"
             android:textStyle="bold"
             android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginStart="130dp"
+            android:layout_marginTop="60dp"
+            android:layout_marginEnd="130dp"
+            android:contentDescription="@string/application_logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/logo_eco" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

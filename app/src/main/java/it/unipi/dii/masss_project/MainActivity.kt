@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -83,18 +84,7 @@ class MainActivity : AppCompatActivity() {
                 val toast = Toast.makeText(this, message, duration)
                 toast.show()
             }
-        } else {
-            // user logout
-            auth.signOut()
-
-            // clear input text editor
-            binding.inputEmail.setText("")
-            binding.inputPassword.setText("")
-            binding.inputEmail.requestFocus()
-
-            "Login".also { binding.loginButton.text = it }
         }
-
     }
 
     override fun onStop() {
@@ -116,11 +106,6 @@ class MainActivity : AppCompatActivity() {
         val prefs = getPreferences(MODE_PRIVATE)
         binding.inputPassword.setText(prefs.getString("password", ""))
         binding.inputEmail.setText(prefs.getString("email", ""))
-
-        if(auth.currentUser != null) {
-            // the user is logged in - view logout button
-            "Logout".also { binding.loginButton.text = it }
-        }
     }
 
     override fun onDestroy() {
@@ -162,6 +147,7 @@ class MainActivity : AppCompatActivity() {
         val username: String = parts[0]
         val intent = Intent(this, RecordingActivity::class.java)
         intent.putExtra("username", username)
+        intent.putExtra("auth", email)
         startActivity(intent)
     }
 
@@ -178,7 +164,11 @@ class MainActivity : AppCompatActivity() {
                     val userData = hashMapOf(
                         "username" to username,
                         "email" to email,
-                        "password" to password
+                        "password" to password,
+                        "last_<1km" to "",
+                        "last_1-5km" to "",
+                        "last_5-10km" to "",
+                        "last_>10km" to ""
                     )
                     userRef.set(userData)
 
