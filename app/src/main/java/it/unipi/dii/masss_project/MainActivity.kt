@@ -3,29 +3,20 @@ package it.unipi.dii.masss_project
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import com.chaquo.python.Python
-import com.chaquo.python.android.AndroidPlatform
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
-import org.tensorflow.lite.Interpreter
-import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
-import java.nio.MappedByteBuffer
-import java.nio.channels.FileChannel
-
-import org.tensorflow.lite.TensorFlowLite as tfl
 
 
 class MainActivity : AppCompatActivity() {
@@ -36,9 +27,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if( !Python.isStarted() ) {
-            Python.start( AndroidPlatform( this ) )
-        }
 
         binding = DataBindingUtil.setContentView(
             this, R.layout.activity_main)
@@ -52,18 +40,6 @@ class MainActivity : AppCompatActivity() {
         // add listener for loginButton
         val button: Button = binding.loginButton
         button.setOnClickListener{onLoginAttempt()}
-        var string: String = ""
-        try {
-            val inputStream: InputStream = assets.open("test_assets.txt")
-            val size: Int = inputStream.available()
-            val buffer = ByteArray(size)
-            inputStream.read(buffer)
-            string = String(buffer)
-
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        println(string)
     }
 
     private fun onLoginAttempt() {
@@ -225,24 +201,4 @@ class MainActivity : AppCompatActivity() {
                 }
             }
     }
-
-//    private fun loadModelFile(assetManager: AssetManager, modelPath: String): MappedByteBuffer {
-//        val fileDescriptor = assetManager.openFd(modelPath)
-//        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
-//        val fileChannel = inputStream.channel
-//        val startOffset = fileDescriptor.startOffset
-//        val declaredLength = fileDescriptor.declaredLength
-//        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
-//    }
-    // INTERPRETER = Interpreter(loadModelFile(assetManager, modelPath))
-    /* val tfliteModel = FileUtil.loadMappedFile(context, "model.tflite")
-    val interpreter = Interpreter(tfliteModel)
-
-    // Get input and output tensors.
-    val inputTensor = interpreter.getInputTensor(0)
-    val outputTensor = interpreter.getOutputTensor(0)
-
-    // Run inference
-    interpreter.run(inputTensor.buffer, outputTensor.buffer.rewind())
-    */
 }
