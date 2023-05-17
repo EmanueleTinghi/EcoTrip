@@ -30,10 +30,10 @@ class ResultActivity : AppCompatActivity() {
 
         // register listener for backButton
         val backButton = binding.backButton
-        backButton.setOnClickListener { onBackPressed(binding) }
+        backButton.setOnClickListener { onBackPressed() }
     }
 
-    private fun onBackPressed(binding: ActivityResultBinding) {
+    override fun onBackPressed() {
         val intent = Intent(this, RecordingActivity::class.java)
         intent.putExtra("username", username)
         startActivity(intent)

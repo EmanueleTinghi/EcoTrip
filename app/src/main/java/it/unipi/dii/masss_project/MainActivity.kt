@@ -47,7 +47,6 @@ class MainActivity : AppCompatActivity() {
         // add listener for loginButton
         val button: Button = binding.loginButton
         button.setOnClickListener{onLoginAttempt()}
-        var string: String = ""
     }
 
     private fun onLoginAttempt() {

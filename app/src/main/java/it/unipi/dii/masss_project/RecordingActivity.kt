@@ -4,28 +4,21 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.AssetManager
-import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
-import java.io.FileInputStream
-import java.nio.MappedByteBuffer
-import java.nio.channels.FileChannel
 
-@Suppress("NAME_SHADOWING")
 class RecordingActivity : AppCompatActivity() {
 
     private lateinit var sensorsCollector: SensorsCollector
@@ -66,7 +59,7 @@ class RecordingActivity : AppCompatActivity() {
 
         // add listener for startButton
         val startButton: Button = binding.startButton
-        startButton.setOnClickListener {onStartAttempt(binding, this) }
+        startButton.setOnClickListener {onStartAttempt(binding) }
 
         // add listener for resultButton
         val resultButton: Button = binding.resultButton
@@ -77,7 +70,7 @@ class RecordingActivity : AppCompatActivity() {
 
     }
 
-    private fun onStartAttempt(binding: ActivityRecordingBinding, activity: RecordingActivity) {
+    private fun onStartAttempt(binding: ActivityRecordingBinding) {
         if (binding.startButton.text == "Start") {
             "Stop".also { binding.startButton.text = it }
 
@@ -122,7 +115,6 @@ class RecordingActivity : AppCompatActivity() {
             getLocation(progress)
 
             /****************           TO-DO              ****************/
-            // todo: usare classificatore per rilevare mezzo di trasporto
             sensorsCollector.startCollection()
 
         } else {
@@ -149,12 +141,8 @@ class RecordingActivity : AppCompatActivity() {
             progress.append("Stop")
             getLocation(progress)
 
-            // todo: collezionare risultati del transportation mode
-
-
-            // todo: passare ad unl'altra pagina che mostra i risultati ottenuti
-            //val intent = Intent(this, ResultActivity::class.java)
-            //startActivity(intent)
+            val intent = Intent(this, ResultActivity::class.java)
+            startActivity(intent)
         }
 
     }

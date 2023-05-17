@@ -5,7 +5,6 @@ import android.util.Log
 import weka.classifiers.meta.AdaBoostM1
 import weka.core.Attribute
 import weka.core.DenseInstance
-import weka.core.FastVector
 import weka.core.Instances
 import weka.core.SerializationHelper
 import java.util.Timer
@@ -41,12 +40,12 @@ class SensorsCollector(applicationContext: Context) {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-        var labels = FastVector<String>()
+        val labels = ArrayList<String>()
 
-        labels.addElement("Car")
-        labels.addElement("Walking")
-        labels.addElement("Bus")
-        labels.addElement("Train")
+        labels.add("Car")
+        labels.add("Walking")
+        labels.add("Bus")
+        labels.add("Train")
         cls = Attribute("class", labels)
 
         val attr1 = Attribute("android.sensor.accelerometer_mean")
@@ -62,20 +61,20 @@ class SensorsCollector(applicationContext: Context) {
         val attr11 = Attribute("android.sensor.magnetic_field_max")
         val attr12 = Attribute("android.sensor.magnetic_field_std")
 
-        val attributes: FastVector<Attribute> = FastVector<Attribute>()
-        attributes.addElement(attr1)
-        attributes.addElement(attr2)
-        attributes.addElement(attr3)
-        attributes.addElement(attr4)
-        attributes.addElement(attr5)
-        attributes.addElement(attr6)
-        attributes.addElement(attr7)
-        attributes.addElement(attr8)
-        attributes.addElement(attr9)
-        attributes.addElement(attr10)
-        attributes.addElement(attr11)
-        attributes.addElement(attr12)
-        attributes.addElement(cls)
+        val attributes = ArrayList<Attribute>()
+        attributes.add(attr1)
+        attributes.add(attr2)
+        attributes.add(attr3)
+        attributes.add(attr4)
+        attributes.add(attr5)
+        attributes.add(attr6)
+        attributes.add(attr7)
+        attributes.add(attr8)
+        attributes.add(attr9)
+        attributes.add(attr10)
+        attributes.add(attr11)
+        attributes.add(attr12)
+        attributes.add(cls)
 
         data = Instances("toClassify", attributes, 0)
 
