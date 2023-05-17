@@ -48,6 +48,7 @@ class SensorsCollector(applicationContext: Context) {
         val labels = ArrayList<String>()
 
         labels.add("car")
+        labels.add("still")
         labels.add("walking")
         labels.add("bus")
         labels.add("train")
@@ -119,7 +120,19 @@ class SensorsCollector(applicationContext: Context) {
         }
 
         val instance = DenseInstance(12)
-        instance.copy(values)
+        instance.setValue(0, values[0])
+        instance.setValue(1, values[1])
+        instance.setValue(2, values[2])
+        instance.setValue(3, values[3])
+        instance.setValue(4, values[4])
+        instance.setValue(5, values[5])
+        instance.setValue(6, values[6])
+        instance.setValue(7, values[7])
+        instance.setValue(8, values[8])
+        instance.setValue(9, values[9])
+        instance.setValue(10, values[10])
+        instance.setValue(11, values[11])
+
         //Add instance to classify
         data.add(instance)
 
@@ -130,7 +143,7 @@ class SensorsCollector(applicationContext: Context) {
         data.removeAt(0)
 
         // Convert the double value back into a string
-        val predictedString: String = cls.value(classification.toInt()).lowercase()
+        val predictedString: String = cls.value(classification.toInt())
 
         Log.d("Classified", predictedString)
 
@@ -182,13 +195,15 @@ class SensorsCollector(applicationContext: Context) {
     }
 
     fun startCollection() {
+        resultClassification.forEach{ (key, _) -> resultClassification[key] = 0}
         timer = Timer()
         Log.d("timer", "startTimer")
         timer.schedule(object : TimerTask() {
             override fun run() {
                 // Do something after a certain period of time
                 val ret = classify()
-                resultClassification[ret] = resultClassification[ret]?.plus(1) ?: 1
+                if(ret != "still")
+                    resultClassification[ret] = resultClassification[ret]?.plus(1) ?: 1
             }
         }, 5000, 5000)
     }
