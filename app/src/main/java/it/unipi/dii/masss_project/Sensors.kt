@@ -1,14 +1,10 @@
 package it.unipi.dii.masss_project
 
-import android.content.Context
-import android.content.pm.PackageManager
+
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.media.MediaRecorder
-import android.os.Environment
-import androidx.core.app.ActivityCompat
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -105,56 +101,23 @@ class SensorMagneticField(private val sensorManager: SensorManager,
         sensorsCollector.storeMagneticFieldSample(magnitude)
     }
 
-    // Implement the onAccuracyChanged method to handle accelerometer sensor accuracy changes
+    // Implement the onAccuracyChanged method to handle magneticField sensor accuracy changes
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         // Do something when the accelerometer sensor accuracy changes
     }
 
-    // Register the accelerometer sensor listener when the AccelerometerManager object is created
+    // Register the accelerometer sensor listener when the MagneticFieldManager object is created
     init {
         sensorManager.registerListener(this, magneticFieldSensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
-    // Register the accelerometer sensor listener when the AccelerometerManager object is created
+    // Register the magneticField sensor listener when the MagneticFieldManager object is created
     fun start() {
         sensorManager.registerListener(this, magneticFieldSensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
-    // Unregister the accelerometer sensor listener when the AccelerometerManager object is destroyed
+    // Unregister the magneticField sensor listener when the MagneticFieldManager object is destroyed
     fun stop() {
         sensorManager.unregisterListener(this)
-    }
-}
-
-class SensorMicrophone(private val context: Context, private val activity: RecordingActivity, private val sensorManager: SensorManager) {
-    private var microphone: MediaRecorder? = null
-    fun start(){
-        if(checkPermission()){
-            val savePath = Environment.getExternalStorageDirectory().toString() +"/travelAudioRecording.3gp"
-            println("Here")
-            microphone!!.setAudioSource(MediaRecorder.AudioSource.MIC)
-            println("Here")
-            microphone!!.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-            println("Here")
-            microphone!!.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-            println("Here")
-            microphone!!.setOutputFile(savePath)
-            println("Here")
-            microphone!!.prepare()
-            println("Here")
-            microphone!!.start()
-            println("Here")
-        }else{
-            ActivityCompat.requestPermissions(activity, arrayOf(android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
-        }
-    }
-
-    fun stop(){
-        microphone!!.stop()
-    }
-
-    private fun checkPermission():Boolean{
-        return (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED)
-                && (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
     }
 }

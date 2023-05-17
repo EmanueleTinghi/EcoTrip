@@ -189,9 +189,6 @@ class SensorsCollector(applicationContext: Context) {
                 // Do something after a certain period of time
                 val ret = classify()
                 resultClassification[ret] = resultClassification[ret]?.plus(1) ?: 1
-
-                println("ret $ret, value ${resultClassification[ret]}")
-                println("classify samples")
             }
         }, 5000, 5000)
     }

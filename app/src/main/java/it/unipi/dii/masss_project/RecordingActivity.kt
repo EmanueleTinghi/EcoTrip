@@ -87,7 +87,7 @@ class RecordingActivity : AppCompatActivity() {
             accelerometer = SensorAccelerometer(sensorManager, sensorsCollector)
             accelerometer!!.start()
 
-            /********************          magneticField          ********************/
+            /********************          MagneticField          ********************/
             //Initialize the magneticField sensor
             magneticField = SensorMagneticField(sensorManager, sensorsCollector)
             magneticField!!.start()
@@ -103,7 +103,7 @@ class RecordingActivity : AppCompatActivity() {
             progress.append("Start")
             getLocation(progress)
 
-            /****************           TO-DO              ****************/
+            /****************           Starting collection sampling              ****************/
             sensorsCollector.startCollection()
 
         } else {
