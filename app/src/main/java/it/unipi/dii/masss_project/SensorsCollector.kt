@@ -1,7 +1,5 @@
 package it.unipi.dii.masss_project
 
-//import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation
-
 import android.content.Context
 import android.content.res.AssetManager
 import android.util.Log
@@ -11,24 +9,16 @@ import weka.core.Attribute
 import weka.core.DenseInstance
 import weka.core.Instances
 import weka.core.SerializationHelper
-import java.io.FileInputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.MappedByteBuffer
-import java.nio.channels.FileChannel
-import java.util.Base64
 import java.util.Timer
 import java.util.TimerTask
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-
 class SensorsCollector(applicationContext: Context) {
     private val assetManager: AssetManager
     private val modelPath = "RF83.model"    // path from assets folder
-    private val interpreter: MappedByteBuffer
-    private lateinit var rfClassifier: RandomForest //.forName(modelPath, null)
+    private var rfClassifier: RandomForest
 
     private val sensorsFeatures = mutableListOf<Double>()
 
@@ -50,52 +40,31 @@ class SensorsCollector(applicationContext: Context) {
         "android.sensor.magnetic_field_max", "android.sensor.magnetic_field_std" )
 
     init {
-//        FileUtil.loadMappedFile(applicationContext, modelPath)
         assetManager = applicationContext.assets
         println("model path $modelPath")
-        interpreter = loadModelFile(assetManager, modelPath)
+        rfClassifier = RandomForest()
         try {
-            rfClassifier =
-                (SerializationHelper.read(assetManager.open(modelPath)) as RandomForest?)!!
+            rfClassifier = (SerializationHelper.read(
+                assetManager.open(modelPath)
+            ) as RandomForest?)!!
         } catch (e: Exception) {
             e.printStackTrace()
         }
-//        classifier.buildClassifier(dataset di addestramento Instance)
-    }
-    private fun loadModelFile(assetManager: AssetManager, modelPath: String): MappedByteBuffer {
-        val fileDescriptor = assetManager.openFd(modelPath)
-        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
-        val fileChannel = inputStream.channel
-        val startOffset = fileDescriptor.startOffset
-        val declaredLength = fileDescriptor.declaredLength
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
-//    fun classifyWeka() {
-//        val classifier = weka.classifiers.Classifier.forName("weka.classifiers.trees.J48", null)
-//        classifier.buildClassifier(data)
-//
-//        val task = object : Task<Void?>() {
-//            override fun call(): Void? {
-//                val result = classifier.classifyInstance(instance)
-//                return null
-//            }
-//        }
-//
-//        val executor = Executors.newSingleThreadExecutor()
-//        executor.submit(task)
-//    }
+    fun buildClassifierInstance() {
+        var labels = ArrayList<String>()
+        labels.add("Car")
+        labels.add("Walking")
+        labels.add("Bus")
+        labels.add("Train")
+        val cls = Attribute("class", labels)
+    }
 
     fun classify(): String? {
         println("classify()")
-//        println("features: $sensorsFeatures")
-//        println("accelerometer: $accelerometerSamples")
-//        println("gyroscope: $gyroscopeSamples")
-//        println("magneticField: $magneticFieldSamples")
         lockAccelerometer.lock()
         try {
-//            Log.d("collector", "extract accelerometer")
-//            sensorsFeatures.addAll(extractFeatures(accelerometerSamples))
             extractFeatures(accelerometerSamples)
             accelerometerSamples.clear()
         } finally {
@@ -104,8 +73,6 @@ class SensorsCollector(applicationContext: Context) {
 
         lockGyroscope.lock()
         try {
-//            Log.d("collector", "extract gyroscope")
-//            sensorsFeatures.addAll(extractFeatures(gyroscopeSamples))
             extractFeatures(gyroscopeSamples)
             gyroscopeSamples.clear()
         } finally {
@@ -114,66 +81,16 @@ class SensorsCollector(applicationContext: Context) {
 
         lockMagneticField.lock()
         try {
-//            Log.d("collector", "extract magnetic field")
-//            sensorsFeatures.addAll(extractFeatures(magneticFieldSamples))
             extractFeatures(magneticFieldSamples)
             magneticFieldSamples.clear()
         } finally {
             lockMagneticField.unlock()
         }
-        println("features: $sensorsFeatures")
-        val input = inputCast()
-        val d = input.get()
-        println("d: $d")
-//        val content = ByteArray(input.remaining())
-//        input.get(content)
-//        val string = Arrays.toString(content)
-//        println("content_in: $string")
-        val output = DoubleArray(5)//.allocateDirect(sensorsFeatures.size * 8)
-        val result = interpreter.run {input}
 
-        result.flip()
-        val byteArray = ByteArray(result.remaining())
-        result.get(byteArray)
-
-        for (i in result.array()) {
-            println("result[i]: $i")
-        }
-
-
-//        val buffer = ByteBuffer.allocateDirect(1024)
-//        val content = ByteArray(result.remaining())
-//        result.get(content)
-//        val string = Arrays.toString(content)
-//        println("content_a: $string")
-
-        Log.d("collector", result.toString())
-        Log.d("collector", byteArray.toString())
-        val label = Base64.getEncoder().encodeToString(byteArray)
-        println("label trip: $label")
-        return label
+        return null
     }
 
-    private fun inputCast(): ByteBuffer {
-        val byteBuffer = ByteBuffer.allocateDirect(sensorsFeatures.size * 8)
-        byteBuffer.order(ByteOrder.nativeOrder())
-        for (value in sensorsFeatures) {
-//            println("for input $value")
-            byteBuffer.putDouble(value)
-//            println("byte position ${byteBuffer.position()}")
-        }
-        sensorsFeatures.clear()
-
-        byteBuffer.flip()
-//        val d = byteBuffer.getDouble(0)
-//        println("d $d")
-//        val content = ByteArray(byteBuffer.remaining())
-//        byteBuffer.get(content)
-//        val string = Arrays.toString(content)
-//        println("content_inputcast: $string")
-        return byteBuffer
-    }
-    private fun extractFeatures(sampleList: MutableList<Double>) {  //}: MutableList<Double> {
+    private fun extractFeatures(sampleList: MutableList<Double>) {
         val mean = sampleList.average()
         val min = sampleList.min()
         val max = sampleList.max()
@@ -184,8 +101,6 @@ class SensorsCollector(applicationContext: Context) {
         sensorsFeatures.add(min)
         sensorsFeatures.add(max)
         sensorsFeatures.add(stDev)
-//        sensorsFeatures.addAll()
-//        return mutableListOf(mean, min, max, stDev)
     }
 
     fun storeAcceleratorSample(magnitude: Double) {
@@ -220,7 +135,7 @@ class SensorsCollector(applicationContext: Context) {
 
     fun startCollection() {
         timer = Timer()
-        Log.d("timer", "startT")
+        Log.d("timer", "startTimer")
         timer.schedule(object : TimerTask() {
             override fun run() {
                 // Do something after a certain period of time
@@ -233,7 +148,7 @@ class SensorsCollector(applicationContext: Context) {
 
     fun stopCollection() {
         timer.cancel()
-        Log.d("timer", "stopT")
+        Log.d("timer", "stopTimer")
 
     }
     private fun classify(classifier: Classifier): String {
@@ -276,11 +191,12 @@ class SensorsCollector(applicationContext: Context) {
         data.setClassIndex(data.numAttributes() - 1)
         println("data class ind: ${data.classIndex()}")
         val resultClass = try {
-            classifier.classifyInstance(data.lastInstance()).toString()
+            classifier.classifyInstance(data.firstInstance()).toString()
         } catch (e: Exception) {
             e.printStackTrace()
             "catch"
         }
+        data.clear()
         println("result_class $resultClass")
         return resultClass
     }

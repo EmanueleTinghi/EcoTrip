@@ -6,11 +6,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.media.AudioFormat
-import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.os.Environment
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -28,13 +25,8 @@ class SensorGyroscope(private val sensorManager: SensorManager,
         val z = event.values[2]
 
         val magnitude = sqrt(((x.pow(2)) + (y.pow(2)) + (z.pow(2))).toDouble())
-        val samples = "${event.timestamp},${event.sensor.stringType},${magnitude}\n"
         sensorsCollector.storeGyroscopeSample(magnitude)
-        // todo: call a function storing the sample collected to then send to the python module
-//        SensorsCollector.store_gyroscope_sample(event.timestamp, magnitude)
-        // Do something with the gyroscope data
-        // For example, log the gyroscope data to the console
-//        Log.d("Gyroscope: ", "x=$x y=$y z=$z")
+
     }
 
     // Implement the onAccuracyChanged method to handle gyroscope sensor accuracy changes
@@ -73,10 +65,6 @@ class SensorAccelerometer(private val sensorManager: SensorManager,
 
         val magnitude = sqrt(((x.pow(2)) + (y.pow(2)) + (z.pow(2))).toDouble())
         sensorsCollector.storeAcceleratorSample(magnitude)
-//        SensorsCollector.store_accelerator_sample(event.timestamp, magnitude)
-        // Do something with the accelerometer data
-        // For example, log the accelerometer data to the console
-//        Log.d("Accelerometer: ", "x=$x y=$y z=$z")
     }
 
     // Implement the onAccuracyChanged method to handle accelerometer sensor accuracy changes
@@ -115,10 +103,6 @@ class SensorMagneticField(private val sensorManager: SensorManager,
 
         val magnitude = sqrt(((x.pow(2)) + (y.pow(2)) + (z.pow(2))).toDouble())
         sensorsCollector.storeMagneticFieldSample(magnitude)
-//        SensorsCollector.store_accelerator_sample(event.timestamp, magnitude)
-        // Do something with the accelerometer data
-        // For example, log the accelerometer data to the console
-//        Log.d("Accelerometer: ", "x=$x y=$y z=$z")
     }
 
     // Implement the onAccuracyChanged method to handle accelerometer sensor accuracy changes
