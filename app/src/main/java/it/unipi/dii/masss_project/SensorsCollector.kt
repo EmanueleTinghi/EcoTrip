@@ -6,7 +6,6 @@ import weka.classifiers.trees.J48
 import weka.core.Attribute
 import weka.core.DenseInstance
 import weka.core.FastVector
-import weka.core.Instance
 import weka.core.Instances
 import weka.core.SerializationHelper
 import java.util.Timer
@@ -23,6 +22,7 @@ class SensorsCollector(applicationContext: Context) {
     private val sensorsFeatures = mutableListOf<Double>()
 
     private lateinit var data: Instances
+    private lateinit var cls: Attribute
 
     private val accelerometerSamples = mutableListOf<Double>()
     private val gyroscopeSamples = mutableListOf<Double>()
@@ -49,7 +49,7 @@ class SensorsCollector(applicationContext: Context) {
         labels.addElement("Walking")
         labels.addElement("Bus")
         labels.addElement("Train")
-        val cls = Attribute("class", labels)
+        cls = Attribute("class", labels)
 
         val attr1 = Attribute("android.sensor.accelerometer_mean")
         val attr2 = Attribute("android.sensor.accelerometer_min")
@@ -116,12 +116,21 @@ class SensorsCollector(applicationContext: Context) {
         }
         val instance: DenseInstance = DenseInstance(12)
         instance.copy(values)
-
+        //Add instance to classify
         data.add(instance)
 
-        val ciao = classifier.classifyInstance(data[0])
-        Log.d("Classified as", ciao.toString())
-        return "We";
+        val class_ = classifier.classifyInstance(data[0])
+
+        //Remove features of the classified instance, store the result and delete data safely
+        data.removeAt(0)
+
+        // Convert the double value back into a string
+        // Convert the double value back into a string
+        val predString: String = cls.value(class_.toInt())
+
+        Log.d("Classified", predString)
+
+        return predString;
     }
 
 
