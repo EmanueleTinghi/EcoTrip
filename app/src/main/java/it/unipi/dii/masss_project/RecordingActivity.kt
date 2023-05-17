@@ -37,7 +37,6 @@ class RecordingActivity : AppCompatActivity() {
 
     private var gyroscope: SensorGyroscope? = null
     private var accelerometer: SensorAccelerometer? = null
-    private var microphone: SensorMicrophone? = null
 
     private lateinit var meansOfTransportDetected: String
 
@@ -142,12 +141,6 @@ class RecordingActivity : AppCompatActivity() {
             gyroscope = SensorGyroscope(sensorManager)
             gyroscope!!.start()
 
-            /********************          Microphone          ********************/
-            //Initialize the gyroscope sensor
-            microphone = SensorMicrophone(this, activity, sensorManager)
-
-            //microphone!!.start()
-
             /****************           GPS              ****************/
             // retrieve user current location - start point
             val progress = StringBuilder()
@@ -160,7 +153,6 @@ class RecordingActivity : AppCompatActivity() {
         } else {
             gyroscope!!.stop()
             accelerometer!!.stop()
-            //microphone!!.stop()
 
             // Block the user in this activity until stopped recording
             startedRecording = false
@@ -405,7 +397,7 @@ class RecordingActivity : AppCompatActivity() {
                         }
 
                         val green = if (userWeightedAverage >= generalWeightedAverage){
-                            "Great! You are very green, keep it up!."
+                            "Great! You are very green, keep it up!"
                         } else {
                             "Bad! You are below the general average."
                         }
