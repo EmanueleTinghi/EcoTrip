@@ -15,8 +15,6 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
-import java.io.IOException
-import java.io.InputStream
 
 
 class MainActivity : AppCompatActivity() {
