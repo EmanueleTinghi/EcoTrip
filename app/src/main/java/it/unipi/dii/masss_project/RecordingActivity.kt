@@ -43,21 +43,22 @@ class RecordingActivity : AppCompatActivity() {
 
     private lateinit var meansOfTransportDetected: String
 
+    private lateinit var progress: String
     private lateinit var locationManager :LocationManager
     private lateinit var locationListener :LocationListener
     private lateinit var startCity: String
     private var startPoint: Location = Location("Start point")
     private var endPoint: Location = Location("End point")
 
-    private val distances = mutableListOf<Float>()
+    private val distances = mutableListOf<Double>()
     private var finalDistance: Double = 0.0
 
     private var startedRecording: Boolean = false
 
-    val carScore = 1
-    val busScore = 5
-    val walkingScore = 10
-    val trainScore = 7
+    private val carScore = 1
+    private val busScore = 5
+    private val walkingScore = 10
+    private val trainScore = 7
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,8 +78,13 @@ class RecordingActivity : AppCompatActivity() {
         // initialize firebase firestore
         db = FirebaseFirestore.getInstance()
 
+        // initialize progress
+        progress = "Start"
+
         // initialize location manager
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        // initialize location listener
+        initializeLocationListener()
 
         // add welcome text view
         val welcomeTextView: TextView = binding.welcomeTextView
@@ -152,14 +158,15 @@ class RecordingActivity : AppCompatActivity() {
 
             /****************           GPS              ****************/
             // retrieve user current location - start point
-            val progress = StringBuilder()
-            progress.append("Start")
-            getLocation(progress)
+            progress = "Start"
+            getLocation()
 
             /****************           Starting collection sampling              ****************/
             sensorsCollector.startCollection()
 
         } else {
+            progress = "Stop"
+
             gyroscope!!.stop()
             accelerometer!!.stop()
             magneticField!!.stop()
@@ -180,15 +187,9 @@ class RecordingActivity : AppCompatActivity() {
             val toast = Toast.makeText(this, message, duration)
             toast.show()
 
-            // todo: obtain classification results
-//            meansOfTransportDetected = classification
-
             // retrieve user current location - end point
             // and calculate distance between start and end points
-            val progress = StringBuilder()
-            progress.append("Stop")
-            getLocation(progress)
-
+            getLocation()
         }
 
     }
@@ -209,8 +210,37 @@ class RecordingActivity : AppCompatActivity() {
         welcomeTextView.visibility = View.VISIBLE
     }
 
-    private fun getLocation(progress: StringBuilder) {
+    private fun getLocation() {
 
+        if (progress == "Start") {
+            // Register the listener to receive location updates
+            checkLocationPermission()
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 5.0f, locationListener)
+
+        } else if (progress == "Stop") {
+
+            // calculate distance between intermediate and end point
+            val distance = (startPoint.distanceTo(endPoint) / 1000.0)
+            println("DISTANCE: $distance km")
+            distances.add(distance)
+
+            // calculate final distance
+            finalDistance = if ( distances.sum() < 0 )
+                0.0
+            else
+                distances.sum()
+            println("FINAL DISTANCE: $finalDistance km")
+
+            // empty distances list
+            distances.clear()
+
+            locationManager.removeUpdates(locationListener)
+
+            updateStorage()
+        }
+    }
+
+    private fun initializeLocationListener() {
         // get the application context
         val context = this
 
@@ -224,11 +254,15 @@ class RecordingActivity : AppCompatActivity() {
                 val latitude = location.latitude
                 val longitude = location.longitude
 
-                when (progress.toString()) {
+                when (progress) {
                     "Start" -> {
                         // start point
                         startPoint.latitude = latitude
                         startPoint.longitude = longitude
+
+                        // end point
+                        endPoint.latitude = latitude
+                        endPoint.longitude = longitude
 
                         // get start city from gps coordinates
                         val geocoderTask = GeocoderTask(context, object : GeocoderTask.OnGeocoderCompletedListener {
@@ -242,7 +276,7 @@ class RecordingActivity : AppCompatActivity() {
                         geocoderTask.execute(startPoint)
 
                         println("START LOCATION: latitude ${startPoint.latitude}, longitude ${startPoint.longitude}")
-                        progress.append("Intermediate")
+                        progress ="Intermediate"
 
                     }
                     "Stop" -> {
@@ -252,181 +286,9 @@ class RecordingActivity : AppCompatActivity() {
                         endPoint.longitude = longitude
                         println("STOP LOCATION: latitude ${endPoint.latitude}, longitude ${endPoint.longitude}")
 
-                        // calculate distance between intermediate and end point
-                        val distance = (startPoint.distanceTo(endPoint) / 1000.0).toFloat()
-                        println("DISTANCE: $distance km")
-                        distances.add(distance)
-
-                        // calculate final distance
-                        finalDistance = distances.sum().toDouble()
-                        println("FINAL DISTANCE: $finalDistance km")
-
-                        // empty distances list
-                        distances.clear()
-
                         // Stop receiving location updates
-                        locationManager.removeUpdates(this)
+                        locationManager.removeUpdates(locationListener)
 
-                        // retrieve and update aggregate results for start city, if any
-                        val query = db.collection("aggregateResults").whereEqualTo("city", startCity)
-                        query.get().addOnSuccessListener { documents ->
-                            if (documents.isEmpty) {
-                                // No documents found for start city -> create a new document
-                                val aggregateResults = initializeAggregateResults()
-                                val aggregateResultsRef = db.collection("aggregateResults").document(startCity)
-                                aggregateResultsRef.set(aggregateResults)
-
-                            } else {
-                                // Document(s) found for start city -> update document
-                                val increment = FieldValue.increment(1)
-                                val fieldPath = initializeFieldPath()
-                                for(document in documents) {
-                                    val docRef = document.reference
-                                    docRef.update(fieldPath, increment)
-                                        .addOnSuccessListener { Log.d(TAG, "Incremented $fieldPath value of aggregateResults collection") }
-                                        .addOnFailureListener { e -> Log.w(TAG, "Error incrementing $fieldPath value of aggregateResults collection", e) }
-
-                                }
-                            }
-                        }.addOnFailureListener { exception ->
-                            // Handle any errors here
-                            val message = "${exception.message}"
-                            val duration = Toast.LENGTH_LONG
-                            val toast = Toast.makeText(context, message, duration)
-                            toast.show()
-                        }
-
-                        // Get the currently signed-in user
-                        val currentUser = auth.currentUser
-                        // Retrieve the user ID
-                        val userID = currentUser?.uid
-                        if (userID != null) {
-                            // retrieve user document to update its aggregate results
-                            val userRef = db.collection("users").document(userID)
-
-                            userRef.get()
-                                .addOnSuccessListener { document ->
-                                    if (document.data?.containsKey("results") == true) {
-                                        // the user document contains aggregate results
-                                        val results = document.data?.get("results") as HashMap<*, *>
-
-                                        // get aggregate user results for start city, if any
-                                        if (results.containsKey(startCity)) {
-                                            // user have aggregate results for start city -> update aggregate results
-                                            val increment = FieldValue.increment(1)
-                                            val fieldPath = "results.$startCity." + initializeFieldPath()
-                                            val docRef = document.reference
-                                            docRef.update(fieldPath, increment)
-                                                .addOnSuccessListener { Log.d(TAG, "Incremented $fieldPath value of user collection") }
-                                                .addOnFailureListener { e -> Log.w(TAG, "Error incrementing $fieldPath value of user collection", e) }
-                                        } else {
-                                            // user have no aggregate results for start city -> insert new aggregate results in results map
-                                            val aggregateResults = initializeAggregateResults()
-                                            val docRef = document.reference
-                                            docRef.update("results.$startCity", aggregateResults)
-                                                .addOnSuccessListener { Log.d(TAG, "Added new aggregate results for new city in user collection") }
-                                                .addOnFailureListener { e -> Log.w(TAG, "Error adding new aggregate results for new city in user collection", e) }
-                                        }
-                                    } else {
-                                        // the user haven't any aggregate results yet -> create results field
-                                        val aggregateResults = initializeAggregateResults()
-                                        val results = hashMapOf(
-                                            startCity to aggregateResults
-                                        )
-                                        val docRef = document.reference
-                                        docRef.update("results",results)
-                                            .addOnSuccessListener { Log.d(TAG, "Results added to user document") }
-                                            .addOnFailureListener { e -> Log.w(TAG, "Error adding results to user document", e) }
-                                    }
-                                }
-                                .addOnFailureListener { exception ->
-                                    // Handle any errors here
-                                    val message = "${exception.message}"
-                                    val duration = Toast.LENGTH_LONG
-                                    val toast = Toast.makeText(context, message, duration)
-                                    toast.show()
-                                }
-                        }
-
-                        // calculate green score
-                        var generalWeightedAverage = 0.0
-                        var userWeightedAverage = 0.0
-
-                        val query2 = db.collection("aggregateResults").whereEqualTo("city", startCity)
-                        query2.get().addOnSuccessListener { documents ->
-                            if (!documents.isEmpty) {
-                                for(document in documents) {
-                                    val range = getRange()
-                                    val travelDistance = document.get("travelDistances.$range") as HashMap<*, *>
-                                    val totBus = travelDistance["bus"] as Long
-                                    val totTrain = travelDistance["train"] as Long
-                                    val totWalking = travelDistance["walking"] as Long
-                                    val totCar = travelDistance["car"] as Long
-                                    generalWeightedAverage = (totBus.toDouble() * busScore + totTrain.toDouble() * trainScore + totWalking.toDouble() * walkingScore + totCar.toDouble() * carScore) /
-                                            (totBus.toDouble() + totTrain.toDouble() + totWalking.toDouble() + totCar.toDouble())
-                                    println("General Weighted Average: $generalWeightedAverage")
-                                }
-                            }
-                        }.addOnFailureListener { exception ->
-                            // Handle any errors here
-                            val message = "${exception.message}"
-                            val duration = Toast.LENGTH_LONG
-                            val toast = Toast.makeText(context, message, duration)
-                            toast.show()
-                        }
-
-                        if (userID != null) {
-                            val userRef = db.collection("users").document(userID)
-                            userRef.get()
-                                .addOnSuccessListener { document ->
-                                    if (document.data?.containsKey("results") == true) {
-                                        val results = document.data?.get("results") as HashMap<*, *>
-                                        if (results.containsKey(startCity)) {
-                                            val range = getRange()
-                                            val aggregateResults = results[startCity] as HashMap<*, *>
-                                            val travelDistances = aggregateResults["travelDistances"] as HashMap<*, *>
-                                            val travelDistance = travelDistances[range] as HashMap<*, *>
-                                            val totBus = travelDistance["bus"] as Long
-                                            val totTrain = travelDistance["train"] as Long
-                                            val totWalking = travelDistance["walking"] as Long
-                                            val totCar = travelDistance["car"] as Long
-                                            userWeightedAverage =
-                                                (totBus.toDouble() * busScore + totTrain.toDouble() * trainScore + totWalking.toDouble() * walkingScore + totCar.toDouble() * carScore) /
-                                                        (totBus.toDouble() + totTrain.toDouble() + totWalking.toDouble() + totCar.toDouble())
-                                            println("userWeightedAverage: $userWeightedAverage")
-                                        }
-                                    }
-                                }
-                                .addOnFailureListener { exception ->
-                                    // Handle any errors here
-                                    val message = "${exception.message}"
-                                    val duration = Toast.LENGTH_LONG
-                                    val toast = Toast.makeText(context, message, duration)
-                                    toast.show()
-                                }
-                        }
-
-                        val green = if (userWeightedAverage >= generalWeightedAverage){
-                            "Great! You are very green, keep it up!"
-                        } else {
-                            "Bad! You are below the general average."
-                        }
-                        if (userID != null) {
-                            val userRef = db.collection("users").document(userID)
-                            userRef.get()
-                                .addOnSuccessListener { document ->
-                                    val resultToUpdate = getFinalUserResultToUpdate()
-                                    val docRef = document.reference
-                                    docRef.update(resultToUpdate, green)
-                                }
-                                .addOnFailureListener { exception ->
-                                    // Handle any errors here
-                                    val message = "${exception.message}"
-                                    val duration = Toast.LENGTH_LONG
-                                    val toast = Toast.makeText(context, message, duration)
-                                    toast.show()
-                                }
-                        }
                     }
                     else -> {
                         // intermediate point
@@ -435,7 +297,7 @@ class RecordingActivity : AppCompatActivity() {
                         println("INTERMEDIATE LOCATION: latitude ${endPoint.latitude}, longitude ${endPoint.longitude}")
 
                         // calculate distance between start and intermediate point
-                        val distance = (startPoint.distanceTo(endPoint) / 1000.0).toFloat()
+                        val distance = (startPoint.distanceTo(endPoint) / 1000.0)
                         println("DISTANCE: $distance km")
                         distances.add(distance)
 
@@ -449,15 +311,178 @@ class RecordingActivity : AppCompatActivity() {
             override fun onProviderDisabled(provider: String) {}
 
         }
-        checkLocationPermission()
+    }
+    private fun updateStorage() {
 
-        // Register the listener to receive location updates
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 5.0f, locationListener)
+        // retrieve and update aggregate results for start city, if any
+        val query = db.collection("aggregateResults").whereEqualTo("city", startCity)
+        query.get().addOnSuccessListener { documents ->
+            if (documents.isEmpty) {
+                // No documents found for start city -> create a new document
+                val aggregateResults = initializeAggregateResults()
+                val aggregateResultsRef = db.collection("aggregateResults").document(startCity)
+                aggregateResultsRef.set(aggregateResults)
+
+            } else {
+                // Document(s) found for start city -> update document
+                val increment = FieldValue.increment(1)
+                val fieldPath = initializeFieldPath()
+                for(document in documents) {
+                    val docRef = document.reference
+                    docRef.update(fieldPath, increment)
+                        .addOnSuccessListener { Log.d(TAG, "Incremented $fieldPath value of aggregateResults collection") }
+                        .addOnFailureListener { e -> Log.w(TAG, "Error incrementing $fieldPath value of aggregateResults collection", e) }
+
+                }
+            }
+        }.addOnFailureListener { exception ->
+            // Handle any errors here
+            val message = "${exception.message}"
+            val duration = Toast.LENGTH_LONG
+            val toast = Toast.makeText(this, message, duration)
+            toast.show()
+        }
+
+        // Get the currently signed-in user
+        val currentUser = auth.currentUser
+        // Retrieve the user ID
+        val userID = currentUser?.uid
+        if (userID != null) {
+            // retrieve user document to update its aggregate results
+            val userRef = db.collection("users").document(userID)
+
+            userRef.get()
+                .addOnSuccessListener { document ->
+                    if (document.data?.containsKey("results") == true) {
+                        // the user document contains aggregate results
+                        val results = document.data?.get("results") as HashMap<*, *>
+
+                        // get aggregate user results for start city, if any
+                        if (results.containsKey(startCity)) {
+                            // user have aggregate results for start city -> update aggregate results
+                            val increment = FieldValue.increment(1)
+                            val fieldPath = "results.$startCity." + initializeFieldPath()
+                            val docRef = document.reference
+                            docRef.update(fieldPath, increment)
+                                .addOnSuccessListener { Log.d(TAG, "Incremented $fieldPath value of user collection") }
+                                .addOnFailureListener { e -> Log.w(TAG, "Error incrementing $fieldPath value of user collection", e) }
+                        } else {
+                            // user have no aggregate results for start city -> insert new aggregate results in results map
+                            val aggregateResults = initializeAggregateResults()
+                            val docRef = document.reference
+                            docRef.update("results.$startCity", aggregateResults)
+                                .addOnSuccessListener { Log.d(TAG, "Added new aggregate results for new city in user collection") }
+                                .addOnFailureListener { e -> Log.w(TAG, "Error adding new aggregate results for new city in user collection", e) }
+                        }
+                    } else {
+                        // the user haven't any aggregate results yet -> create results field
+                        val aggregateResults = initializeAggregateResults()
+                        val results = hashMapOf(
+                            startCity to aggregateResults
+                        )
+                        val docRef = document.reference
+                        docRef.update("results",results)
+                            .addOnSuccessListener { Log.d(TAG, "Results added to user document") }
+                            .addOnFailureListener { e -> Log.w(TAG, "Error adding results to user document", e) }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    // Handle any errors here
+                    val message = "${exception.message}"
+                    val duration = Toast.LENGTH_LONG
+                    val toast = Toast.makeText(this, message, duration)
+                    toast.show()
+                }
+        }
+
+        // calculate green score
+        var generalWeightedAverage = 0.0
+        var userWeightedAverage = 0.0
+
+        val query2 = db.collection("aggregateResults").whereEqualTo("city", startCity)
+        query2.get().addOnSuccessListener { documents ->
+            if (!documents.isEmpty) {
+                for(document in documents) {
+                    val range = getRange()
+                    val travelDistance = document.get("travelDistances.$range") as HashMap<*, *>
+                    val totBus = travelDistance["bus"] as Long
+                    val totTrain = travelDistance["train"] as Long
+                    val totWalking = travelDistance["walking"] as Long
+                    val totCar = travelDistance["car"] as Long
+                    if ((totBus.toDouble() + totTrain.toDouble() + totWalking.toDouble() + totCar.toDouble()) != 0.0) {
+                        generalWeightedAverage = (totBus.toDouble() * busScore + totTrain.toDouble() * trainScore + totWalking.toDouble() * walkingScore + totCar.toDouble() * carScore) /
+                                (totBus.toDouble() + totTrain.toDouble() + totWalking.toDouble() + totCar.toDouble())
+                    }
+                    println("General Weighted Average: $generalWeightedAverage")
+                }
+            }
+        }.addOnFailureListener { exception ->
+            // Handle any errors here
+            val message = "${exception.message}"
+            val duration = Toast.LENGTH_LONG
+            val toast = Toast.makeText(this, message, duration)
+            toast.show()
+        }
+
+        if (userID != null) {
+            val userRef = db.collection("users").document(userID)
+            userRef.get()
+                .addOnSuccessListener { document ->
+                    if (document.data?.containsKey("results") == true) {
+                        val results = document.data?.get("results") as HashMap<*, *>
+                        if (results.containsKey(startCity)) {
+                            val range = getRange()
+                            val aggregateResults = results[startCity] as HashMap<*, *>
+                            val travelDistances = aggregateResults["travelDistances"] as HashMap<*, *>
+                            val travelDistance = travelDistances[range] as HashMap<*, *>
+                            val totBus = travelDistance["bus"] as Long
+                            val totTrain = travelDistance["train"] as Long
+                            val totWalking = travelDistance["walking"] as Long
+                            val totCar = travelDistance["car"] as Long
+                            if ((totBus.toDouble() + totTrain.toDouble() + totWalking.toDouble() + totCar.toDouble()) != 0.0) {
+                                userWeightedAverage =
+                                    (totBus.toDouble() * busScore + totTrain.toDouble() * trainScore + totWalking.toDouble() * walkingScore + totCar.toDouble() * carScore) /
+                                            (totBus.toDouble() + totTrain.toDouble() + totWalking.toDouble() + totCar.toDouble())
+                            }
+                            println("User Weighted Average: $userWeightedAverage")
+                        }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    // Handle any errors here
+                    val message = "${exception.message}"
+                    val duration = Toast.LENGTH_LONG
+                    val toast = Toast.makeText(this, message, duration)
+                    toast.show()
+                }
+        }
+
+        val green = if (userWeightedAverage >= generalWeightedAverage){
+            "Great! You are very green, keep it up!"
+        } else {
+            "Bad! You are below the general average."
+        }
+        if (userID != null) {
+            val userRef = db.collection("users").document(userID)
+            userRef.get()
+                .addOnSuccessListener { document ->
+                    val resultToUpdate = getFinalUserResultToUpdate()
+                    val docRef = document.reference
+                    docRef.update(resultToUpdate, green)
+                }
+                .addOnFailureListener { exception ->
+                    // Handle any errors here
+                    val message = "${exception.message}"
+                    val duration = Toast.LENGTH_LONG
+                    val toast = Toast.makeText(this, message, duration)
+                    toast.show()
+                }
+        }
     }
 
     private fun initializeAggregateResults() : AggregateResults {
         lateinit var aggregateResults: AggregateResults
-        if(finalDistance >= 0 && finalDistance < 1){
+        if (finalDistance >= 0 && finalDistance < 1){
             when(meansOfTransportDetected){
                 "bus" -> aggregateResults = AggregateResults(
                     city = startCity,
@@ -618,16 +643,6 @@ class RecordingActivity : AppCompatActivity() {
                     )
                 )
             }
-        } else {
-            aggregateResults = AggregateResults(
-                city = startCity,
-                travelDistances = mapOf(
-                    "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
-                    "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
-                    "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
-                    "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
-                )
-            )
         }
         return aggregateResults
     }
@@ -642,10 +657,7 @@ class RecordingActivity : AppCompatActivity() {
             finalResult = "last_5-10km"
         } else if(finalDistance >= 10) {
             finalResult = "last_>10km"
-        } else {
-            finalResult = ""
         }
-        println("final distance $finalDistance")
         return finalResult
     }
 
