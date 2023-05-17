@@ -31,7 +31,7 @@ class SensorsCollector(applicationContext: Context) {
 
     private lateinit var timer: Timer
 
-    private var resultClassification = mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+    private var resultClassification = mutableMapOf("car" to 0, "bus" to 0, "train" to 0, "walking" to 0)
 
     init {
         println("model path $modelPath")
@@ -45,7 +45,7 @@ class SensorsCollector(applicationContext: Context) {
             e.printStackTrace()
         }
 
-        var labels = ArrayList<String>()
+        val labels = ArrayList<String>()
 
         labels.add("car")
         labels.add("walking")
@@ -88,7 +88,7 @@ class SensorsCollector(applicationContext: Context) {
 
     }
 
-    fun classify(): String? {
+    fun classify(): String {
         println("classify()")
         val values = DoubleArray(data.numAttributes())
         lockAccelerometer.lock()
@@ -118,7 +118,7 @@ class SensorsCollector(applicationContext: Context) {
             lockMagneticField.unlock()
         }
 
-        val instance: DenseInstance = DenseInstance(12)
+        val instance = DenseInstance(12)
         instance.copy(values)
         //Add instance to classify
         data.add(instance)
@@ -134,7 +134,7 @@ class SensorsCollector(applicationContext: Context) {
 
         Log.d("Classified", predString)
 
-        return predString;
+        return predString
     }
 
     private fun extractFeatures(sampleList: MutableList<Double>, instance: DoubleArray , index: Int) {
@@ -188,20 +188,19 @@ class SensorsCollector(applicationContext: Context) {
             override fun run() {
                 // Do something after a certain period of time
                 val ret = classify()
-                val value = resultClassification[ret]?.plus(1) ?: 1
+                resultClassification[ret] = resultClassification[ret]?.plus(1) ?: 1
 
-                println("ret $ret, value $value")
-//                classify(rfClassifier)
+                println("ret $ret, value ${resultClassification[ret]}")
                 println("classify samples")
             }
         }, 5000, 5000)
     }
 
-    fun stopCollection() {
+    fun stopCollection(): String? {
         timer.cancel()
         Log.d("timer", "stopTimer")
-        //return labelClassified
-
+        return resultClassification.maxByOrNull { it.value}?.key
     }
+
 }
 

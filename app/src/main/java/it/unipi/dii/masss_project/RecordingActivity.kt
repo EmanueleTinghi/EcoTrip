@@ -111,7 +111,7 @@ class RecordingActivity : AppCompatActivity() {
             accelerometer!!.stop()
             magneticField!!.stop()
 
-            sensorsCollector.stopCollection()
+            val classification = sensorsCollector.stopCollection()
 
             "Start".also { binding.startButton.text = it }
 
