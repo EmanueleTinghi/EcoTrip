@@ -87,7 +87,7 @@ class RecordingActivity : AppCompatActivity() {
 
         // add listener for startButton
         val startButton: Button = binding.startButton
-        startButton.setOnClickListener {onStartAttempt(binding, this) }
+        startButton.setOnClickListener {onStartAttempt() }
 
         // add listener for resultButton
         val resultButton: Button = binding.resultButton
@@ -116,7 +116,7 @@ class RecordingActivity : AppCompatActivity() {
         }
     }
 
-    private fun onStartAttempt(binding: ActivityRecordingBinding, activity: RecordingActivity) {
+    private fun onStartAttempt() {
         if (binding.startButton.text == "Start") {
             "Stop".also { binding.startButton.text = it }
 
@@ -179,9 +179,6 @@ class RecordingActivity : AppCompatActivity() {
             val duration = Toast.LENGTH_LONG
             val toast = Toast.makeText(this, message, duration)
             toast.show()
-
-            // todo: obtain classification results
-//            meansOfTransportDetected = classification
 
             // retrieve user current location - end point
             // and calculate distance between start and end points

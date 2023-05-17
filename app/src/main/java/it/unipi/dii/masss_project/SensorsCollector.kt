@@ -31,7 +31,7 @@ class SensorsCollector(applicationContext: Context) {
 
     private lateinit var timer: Timer
 
-    private var resultClassification = mutableMapOf("car" to 0, "bus" to 0, "train" to 0, "walking" to 0)
+    private var resultClassification = mutableMapOf("still" to 0, "car" to 0, "bus" to 0, "train" to 0, "walking" to 0)
 
     init {
         println("model path $modelPath")
@@ -202,8 +202,7 @@ class SensorsCollector(applicationContext: Context) {
             override fun run() {
                 // Do something after a certain period of time
                 val ret = classify()
-                if(ret != "still")
-                    resultClassification[ret] = resultClassification[ret]?.plus(1) ?: 1
+                resultClassification[ret] = resultClassification[ret]?.plus(1) ?: 1
             }
         }, 5000, 5000)
     }
