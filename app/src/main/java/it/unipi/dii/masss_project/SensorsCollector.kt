@@ -130,11 +130,11 @@ class SensorsCollector(applicationContext: Context) {
         data.removeAt(0)
 
         // Convert the double value back into a string
-        val predString: String = cls.value(classification.toInt()).lowercase()
+        val predictedString: String = cls.value(classification.toInt()).lowercase()
 
-        Log.d("Classified", predString)
+        Log.d("Classified", predictedString)
 
-        return predString
+        return predictedString
     }
 
     private fun extractFeatures(sampleList: MutableList<Double>, instance: DoubleArray , index: Int) {
