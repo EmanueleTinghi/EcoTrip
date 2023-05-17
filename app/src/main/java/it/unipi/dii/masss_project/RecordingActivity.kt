@@ -93,7 +93,7 @@ class RecordingActivity : AppCompatActivity() {
 
         // add listener for startButton
         val startButton: Button = binding.startButton
-        startButton.setOnClickListener {onStartAttempt(binding, this) }
+        startButton.setOnClickListener {onStartAttempt() }
 
         // add listener for resultButton
         val resultButton: Button = binding.resultButton
@@ -122,7 +122,7 @@ class RecordingActivity : AppCompatActivity() {
         }
     }
 
-    private fun onStartAttempt(binding: ActivityRecordingBinding, activity: RecordingActivity) {
+    private fun onStartAttempt() {
         if (binding.startButton.text == "Start") {
             "Stop".also { binding.startButton.text = it }
 

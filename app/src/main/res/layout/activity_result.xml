@@ -14,7 +14,7 @@
             android:id="@+id/logoutButton2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="328dp"
+            android:layout_marginStart="300dp"
             android:layout_marginTop="48dp"
             android:backgroundTint="@color/light_green"
             android:contentDescription="@string/start_recording"
@@ -26,9 +26,7 @@
             android:id="@+id/backButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="150dp"
             android:layout_marginTop="512dp"
-            android:layout_marginEnd="150dp"
             android:backgroundTint="@color/green"
             android:fontFamily="@font/oswald_family"
             android:text="@string/back"
@@ -38,7 +36,7 @@
             app:icon="@drawable/back"
             app:iconTint="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -63,20 +61,20 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="100dp"
+            android:contentDescription="@string/viewpager"
             app:layout_constraintBottom_toTopOf="@+id/tab_layout"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0"
-            app:layout_constraintVertical_chainStyle="packed"
-            android:contentDescription="@string/viewpager"/>
+            app:layout_constraintVertical_chainStyle="packed" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/tertiary"
+            android:contentDescription="@string/tab_layout_for_user_results"
             app:layout_constraintBottom_toTopOf="@+id/backButton"
-            app:layout_constraintTop_toBottomOf="@+id/view_pager"
-            android:contentDescription="@string/tab_layout_for_user_results"/>
+            app:layout_constraintTop_toBottomOf="@+id/view_pager" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
