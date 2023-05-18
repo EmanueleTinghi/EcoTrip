@@ -1,25 +1,10 @@
 package it.unipi.dii.masss_project
 
-import android.content.Context
-import android.util.Log
-import weka.classifiers.meta.AdaBoostM1
-import weka.core.Attribute
-import weka.core.DenseInstance
-import weka.core.Instances
-import weka.core.SerializationHelper
-import java.util.Timer
-import java.util.TimerTask
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class SensorsCollector(applicationContext: Context) {
-
-    private val modelPath = "ADABoostJ48.model"     // path from assets folder
-    private var classifier: AdaBoostM1
-
-    private var data: Instances
-    private var cls: Attribute
+class SensorsCollector {
 
     private val accelerometerSamples = mutableListOf<Double>()
     private val gyroscopeSamples = mutableListOf<Double>()
@@ -29,72 +14,10 @@ class SensorsCollector(applicationContext: Context) {
     private val lockGyroscope = ReentrantLock()
     private val lockMagneticField = ReentrantLock()
 
-    private lateinit var timer: Timer
-
-    private var resultClassification = mutableMapOf("car" to 0, "bus" to 0, "train" to 0, "walking" to 0, "still" to 0)
-
-    init {
-        println("model path $modelPath")
-
-        classifier = AdaBoostM1()
-        try {
-            classifier = SerializationHelper.read(
-                applicationContext.assets.open(modelPath)
-            ) as AdaBoostM1
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-
-        val labels = ArrayList<String>()
-
-        labels.add("car")
-        labels.add("still")
-        labels.add("walking")
-        labels.add("bus")
-        labels.add("train")
-
-        cls = Attribute("class", labels)
-
-        val attr1 = Attribute("android.sensor.accelerometer_mean")
-        val attr2 = Attribute("android.sensor.accelerometer_min")
-        val attr3 = Attribute("android.sensor.accelerometer_max")
-        val attr4 = Attribute("android.sensor.accelerometer_std")
-        val attr5 = Attribute("android.sensor.gyroscope_mean")
-        val attr6 = Attribute("android.sensor.gyroscope_min")
-        val attr7 = Attribute("android.sensor.gyroscope_max")
-        val attr8 = Attribute("android.sensor.gyroscope_std")
-        val attr9 = Attribute("android.sensor.magnetic_field_mean")
-        val attr10 = Attribute("android.sensor.magnetic_field_min")
-        val attr11 = Attribute("android.sensor.magnetic_field_max")
-        val attr12 = Attribute("android.sensor.magnetic_field_std")
-
-        val attributes = ArrayList<Attribute>()
-        attributes.add(attr1)
-        attributes.add(attr2)
-        attributes.add(attr3)
-        attributes.add(attr4)
-        attributes.add(attr5)
-        attributes.add(attr6)
-        attributes.add(attr7)
-        attributes.add(attr8)
-        attributes.add(attr9)
-        attributes.add(attr10)
-        attributes.add(attr11)
-        attributes.add(attr12)
-        attributes.add(cls)
-
-        data = Instances("toClassify", attributes, 0)
-
-        data.setClassIndex(data.numAttributes() - 1)
-
-    }
-
-    fun classify(): String {
-        println("classify()")
-        val values = DoubleArray(data.numAttributes())
+    fun getFeaturesSamples(numFeature: Int): DoubleArray {
+        val values = DoubleArray(numFeature)
         lockAccelerometer.lock()
         try {
-//            extractFeatures(accelerometerSamples)
             extractFeatures(accelerometerSamples, values, 0)
             accelerometerSamples.clear()
         } finally {
@@ -103,7 +26,6 @@ class SensorsCollector(applicationContext: Context) {
 
         lockGyroscope.lock()
         try {
-//            extractFeatures(gyroscopeSamples)
             extractFeatures(gyroscopeSamples, values, 1)
             gyroscopeSamples.clear()
         } finally {
@@ -112,42 +34,12 @@ class SensorsCollector(applicationContext: Context) {
 
         lockMagneticField.lock()
         try {
-//            extractFeatures(magneticFieldSamples)
             extractFeatures(magneticFieldSamples, values, 2)
             magneticFieldSamples.clear()
         } finally {
             lockMagneticField.unlock()
         }
-
-        val instance = DenseInstance(12)
-        instance.setValue(0, values[0])
-        instance.setValue(1, values[1])
-        instance.setValue(2, values[2])
-        instance.setValue(3, values[3])
-        instance.setValue(4, values[4])
-        instance.setValue(5, values[5])
-        instance.setValue(6, values[6])
-        instance.setValue(7, values[7])
-        instance.setValue(8, values[8])
-        instance.setValue(9, values[9])
-        instance.setValue(10, values[10])
-        instance.setValue(11, values[11])
-
-        //Add instance to classify
-        data.add(instance)
-
-        val classification = classifier.classifyInstance(data[0])
-
-
-        //Remove features of the classified instance, store the result and delete data safely
-        data.removeAt(0)
-
-        // Convert the double value back into a string
-        val predictedString: String = cls.value(classification.toInt())
-
-        Log.d("Classified", predictedString)
-
-        return predictedString
+        return values
     }
 
     private fun extractFeatures(sampleList: MutableList<Double>, instance: DoubleArray , index: Int) {
@@ -192,29 +84,6 @@ class SensorsCollector(applicationContext: Context) {
         } finally {
             lockMagneticField.unlock()
         }
-    }
-
-    fun startCollection() {
-        resultClassification.forEach{ (key, _) -> resultClassification[key] = 0}
-        timer = Timer()
-        Log.d("timer", "startTimer")
-        timer.schedule(object : TimerTask() {
-            override fun run() {
-                // Do something after a certain period of time
-                val ret = classify()
-                if (ret == "still")
-                    resultClassification[ret] = 1
-                else
-                    resultClassification[ret] = resultClassification[ret]?.plus(1) ?: 1
-            }
-        }, 5000, 5000)
-    }
-
-    fun stopCollection(): String {
-        timer.cancel()
-        Log.d("timer", "stopTimer")
-        println("result classification ${resultClassification.maxByOrNull { it.value}?.key}")
-        return resultClassification.maxByOrNull { it.value}?.key ?: "None"
     }
 
 }
