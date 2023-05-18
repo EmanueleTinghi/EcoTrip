@@ -324,15 +324,28 @@ class RecordingActivity : AppCompatActivity() {
                 aggregateResultsRef.set(aggregateResults)
 
             } else {
-                // Document(s) found for start city -> update document
-                val increment = FieldValue.increment(1)
-                val fieldPath = initializeFieldPath()
-                for(document in documents) {
-                    val docRef = document.reference
-                    docRef.update(fieldPath, increment)
-                        .addOnSuccessListener { Log.d(TAG, "Incremented $fieldPath value of aggregateResults collection") }
-                        .addOnFailureListener { e -> Log.w(TAG, "Error incrementing $fieldPath value of aggregateResults collection", e) }
+                if (meansOfTransportDetected != "still") {
+                    // Document(s) found for start city -> update document
+                    val increment = FieldValue.increment(1)
+                    val fieldPath = initializeFieldPath()
+                    for (document in documents) {
+                        val docRef = document.reference
+                        docRef.update(fieldPath, increment)
+                            .addOnSuccessListener {
+                                Log.d(
+                                    TAG,
+                                    "Incremented $fieldPath value of aggregateResults collection"
+                                )
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w(
+                                    TAG,
+                                    "Error incrementing $fieldPath value of aggregateResults collection",
+                                    e
+                                )
+                            }
 
+                    }
                 }
             }
         }.addOnFailureListener { exception ->
@@ -359,13 +372,26 @@ class RecordingActivity : AppCompatActivity() {
 
                         // get aggregate user results for start city, if any
                         if (results.containsKey(startCity)) {
-                            // user have aggregate results for start city -> update aggregate results
-                            val increment = FieldValue.increment(1)
-                            val fieldPath = "results.$startCity." + initializeFieldPath()
-                            val docRef = document.reference
-                            docRef.update(fieldPath, increment)
-                                .addOnSuccessListener { Log.d(TAG, "Incremented $fieldPath value of user collection") }
-                                .addOnFailureListener { e -> Log.w(TAG, "Error incrementing $fieldPath value of user collection", e) }
+                            if (meansOfTransportDetected != "still") {
+                                // user have aggregate results for start city -> update aggregate results
+                                val increment = FieldValue.increment(1)
+                                val fieldPath = "results.$startCity." + initializeFieldPath()
+                                val docRef = document.reference
+                                docRef.update(fieldPath, increment)
+                                    .addOnSuccessListener {
+                                        Log.d(
+                                            TAG,
+                                            "Incremented $fieldPath value of user collection"
+                                        )
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.w(
+                                            TAG,
+                                            "Error incrementing $fieldPath value of user collection",
+                                            e
+                                        )
+                                    }
+                            }
                         } else {
                             // user have no aggregate results for start city -> insert new aggregate results in results map
                             val aggregateResults = initializeAggregateResults()
@@ -482,6 +508,18 @@ class RecordingActivity : AppCompatActivity() {
 
     private fun initializeAggregateResults() : AggregateResults {
         lateinit var aggregateResults: AggregateResults
+        if (meansOfTransportDetected == "still") {
+            aggregateResults = AggregateResults(
+                city = startCity,
+                travelDistances = mapOf(
+                    "range(<1km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                    "range(1-5km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                    "range(5-10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0),
+                    "range(>10km)" to mapOf("bus" to 0, "car" to 0, "train" to 0, "walking" to 0)
+                )
+            )
+            return aggregateResults
+        }
         if (finalDistance >= 0 && finalDistance < 1){
             when(meansOfTransportDetected){
                 "bus" -> aggregateResults = AggregateResults(
