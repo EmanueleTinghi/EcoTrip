@@ -42,6 +42,7 @@ class SensorsCollector {
         return values
     }
 
+    /** compute features of sampleList of the data collected from each sensor */
     private fun extractFeatures(sampleList: MutableList<Double>, instance: DoubleArray , index: Int) {
         val mean = sampleList.average()
         val min = sampleList.min()

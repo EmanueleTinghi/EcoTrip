@@ -27,7 +27,7 @@ class TransportationModeClassifier(applicationContext: Context) {
             classifier.classifyInstance(data[0])
         } catch (e: Exception) {
             e.printStackTrace()
-            1.0     // dafault "still"
+            1.0     // default corresponding to "still"
         }
     }
 }

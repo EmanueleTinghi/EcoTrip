@@ -46,6 +46,10 @@ class ClassificationModule (applicationContext: Context) {
         data.setClassIndex(data.numAttributes() - 1)
     }
 
+    /** manage the classification phase
+     * @param values: array containing the features of collected samples
+     * @return the label corresponding to the prediction of the classification
+     * */
     fun handleClassification(values: DoubleArray): String {
         val instance = DenseInstance(values.size)
 
@@ -68,6 +72,7 @@ class ClassificationModule (applicationContext: Context) {
         return predictedLabel
     }
 
+    /** start periodic classification */
     fun startClassification() {
         resultClassification.forEach{ (key, _) -> resultClassification[key] = 0}
         timer = Timer()
