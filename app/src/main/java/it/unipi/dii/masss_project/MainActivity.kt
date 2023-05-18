@@ -19,8 +19,11 @@ import it.unipi.dii.masss_project.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
+    private lateinit var util: Util
+
+    private lateinit var authManager : FirebaseAuthManager
+    private lateinit var firestoreManager: FirestoreManager
+
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,10 +33,13 @@ class MainActivity : AppCompatActivity() {
             this, R.layout.activity_main)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        // initialize firebase authentication
-        auth = FirebaseAuth.getInstance()
-        // initialize firebase firestore
-        db = FirebaseFirestore.getInstance()
+        util = Util(this, binding)
+
+        // initialize firebase firestore manager
+        firestoreManager = FirestoreManager()
+
+        // initialize firebase authentication manager
+        authManager = FirebaseAuthManager(this, binding, firestoreManager)
 
         // add listener for loginButton
         val button: Button = binding.loginButton
@@ -47,41 +53,29 @@ class MainActivity : AppCompatActivity() {
             val password: String = binding.inputPassword.text.toString()
 
             if(password.isNotEmpty() && email.isNotEmpty()) {
-
                 // check if user exists
-                auth.fetchSignInMethodsForEmail(email)
-                    .addOnCompleteListener(this) { task ->
-                        if (task.isSuccessful) {
-                            val result = task.result?.signInMethods
-                            if (result?.contains(EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD) == true) {
-                                // user exists
-                                // handle login flow
-                                loginUser(email, password)
-
-                            } else {
-                                // user doesn't exist
-                                // handle registration flow
-                                registerUser(email, password)
+                authManager.checkIfUserExists(email) { exists ->
+                    if (exists) {
+                        // user exists
+                        // handle login flow
+                        authManager.loginUser(email, password) { success ->
+                            if (success) {
+                                startRecordingActivity(email)
                             }
-                        } else {
-                            // handle error
-                            val message = "Error in checking user existence"
-                            val duration = Toast.LENGTH_LONG
-                            val toast = Toast.makeText(this, message, duration)
-                            toast.show()
-
-                            val errorTextView: TextView = binding.errorTextView
-                            errorTextView.text = "${task.exception?.message}"
-                            errorTextView.setTextColor(Color.RED)
-                            errorTextView.visibility = View.VISIBLE
                         }
-                    }
+                    }else {
+                            // user doesn't exist
+                            // handle registration flow
+                            authManager.registerUser(email, password) { success ->
+                                if (success) {
+                                    startRecordingActivity(email)
+                                }
+                            }
+                        }
+                }
             } else {
                 // Otherwise show error message
-                val message = "Insert email and password, please"
-                val duration = Toast.LENGTH_LONG
-                val toast = Toast.makeText(this, message, duration)
-                toast.show()
+                util.showErrorToast("Insert email and password, please")
             }
         }
     }
@@ -115,29 +109,7 @@ class MainActivity : AppCompatActivity() {
         binding.inputPassword.setText("")
 
         // user logout
-        auth.signOut()
-    }
-
-    private fun loginUser(email: String, password: String) {
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    // go on recordingActivity
-                    startRecordingActivity(email)
-                } else {
-                    // Otherwise show error message
-                    val message = "Authentication failed"
-                    val duration = Toast.LENGTH_LONG
-                    val toast = Toast.makeText(this, message, duration)
-                    toast.show()
-
-                    val errorTextView: TextView = binding.errorTextView
-                    errorTextView.text = "${task.exception?.message}"
-                    errorTextView.setTextColor(Color.RED)
-                    errorTextView.visibility = View.VISIBLE
-
-                }
-            }
+        authManager.logoutUser()
     }
 
     private fun startRecordingActivity(email: String) {
@@ -148,44 +120,5 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra("username", username)
         intent.putExtra("auth", email)
         startActivity(intent)
-    }
-
-    private fun registerUser(email: String, password: String) {
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    // generate a db associated with the new registered user
-                    val user: FirebaseUser? = auth.currentUser
-                    val userId: String? = user?.uid
-                    val userRef: DocumentReference = db.collection("users").document(userId!!)
-                    val parts = email.split("@")
-                    val username: String = parts[0]
-                    val userData = hashMapOf(
-                        "username" to username,
-                        "email" to email,
-                        "password" to password,
-                        "last_<1km" to "",
-                        "last_1-5km" to "",
-                        "last_5-10km" to "",
-                        "last_>10km" to ""
-                    )
-                    userRef.set(userData)
-
-                    // go on recordingActivity
-                    startRecordingActivity(email)
-                } else {
-                    // Otherwise show error message
-                    val message = "Registration failed"
-                    val duration = Toast.LENGTH_LONG
-                    val toast = Toast.makeText(this, message, duration)
-                    toast.show()
-
-                    val errorTextView: TextView = binding.errorTextView
-                    errorTextView.text = "${task.exception?.message}"
-                    errorTextView.setTextColor(Color.RED)
-                    errorTextView.visibility = View.VISIBLE
-
-                }
-            }
     }
 }
