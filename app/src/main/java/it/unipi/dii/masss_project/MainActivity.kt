@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         firestoreManager = FirestoreManager()
 
         // initialize firebase authentication manager
-        authManager = FirebaseAuthManager(this, binding, firestoreManager)
+        authManager = FirebaseAuthManager(this, binding, null, firestoreManager)
 
         // add listener for loginButton
         val button: Button = binding.loginButton

@@ -5,18 +5,20 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
+import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
 
-class FirebaseAuthManager(context: Context, binding: ActivityMainBinding,
+class FirebaseAuthManager(context: Context, mainBinding: ActivityMainBinding?, recordingBinding: ActivityRecordingBinding?,
                           private val firestoreManager: FirestoreManager
 ) {
     // initialize application context
     private val appContext = context
 
-    // initialize activity main binding
-    private val appMainBinding = binding
+    // initialize activity binding
+    private val appMainBinding = mainBinding
+    private val appRecordingBinding = recordingBinding
 
     // initialize utility class
-    private val util = Util(appContext, appMainBinding)
+    private val util = Util(appContext, appMainBinding, appRecordingBinding)
 
     // initialize firebase authentication
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
