@@ -9,15 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.google.android.material.tabs.TabLayout
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import it.unipi.dii.masss_project.databinding.ActivityResultBinding
 import it.unipi.dii.masss_project.databinding.Schedule1Binding
 import it.unipi.dii.masss_project.databinding.Schedule2Binding
@@ -28,6 +25,8 @@ class ResultActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityResultBinding
     private lateinit var username: String
+
+    private lateinit var authManager : FirebaseAuthManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +56,9 @@ class ResultActivity : AppCompatActivity() {
         val tabLayout = findViewById<TabLayout>(R.id.tab_layout)
         tabLayout.setupWithViewPager(viewPager)
 
+        // initialize firebase authentication manager
+        authManager = FirebaseAuthManager(this, null, null)
+
     }
 
     private fun onBackButtonPressed() {
@@ -66,7 +68,7 @@ class ResultActivity : AppCompatActivity() {
     }
 
     private fun onLogout() {
-        FirebaseAuth.getInstance().signOut()
+        authManager.logoutUser()
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
     }
@@ -107,91 +109,75 @@ class Schedule1Fragment : Fragment() {
 
     private lateinit var binding: Schedule1Binding
 
-    private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
+    private lateinit var util: Util
+
+    private lateinit var authManager : FirebaseAuthManager
+    private lateinit var firestoreManager: FirestoreManager
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         binding = Schedule1Binding.inflate(inflater, container, false)
 
-        // initialize firebase authentication
-        auth = FirebaseAuth.getInstance()
-        // initialize firebase firestore
-        db = FirebaseFirestore.getInstance()
+        util = context?.let { Util(it, null) }!!
 
-        // Get the currently signed-in user
-        val currentUser = auth.currentUser
+        // initialize firebase firestore manager
+        firestoreManager = FirestoreManager()
+        // initialize firebase authentication manager
+        authManager = FirebaseAuthManager(null, null, firestoreManager)
 
         // Retrieve the user ID
-        val userID = currentUser?.uid
+        val userID = authManager.getUserID()
 
         if (userID != null) {
-            // Get a reference to the user document
-            val userRef = db.collection("users").document(userID)
+            firestoreManager.getUserResultRange(userID, "last_<1km",
+            onSuccess = { result ->
+                // add text view to see result
+                val resultTextView: TextView = binding.textViewSchedule1
 
-            // Get the user data
-            userRef.get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        val result = document.getString("last_<1km")
+                if( result != null && result != "") {
+                    "$result".also { resultTextView.text = it }
+                } else {
+                    "You haven't done any <1km trips yet".also { resultTextView.text = it }
+                }
 
-                        // add text view to see result
-                        val resultTextView: TextView = binding.textViewSchedule1
+                when (result) {
+                    "Great! You are very green, keep it up!" -> {
+                        val resolvedColor = ContextCompat.getColor(requireContext(), R.color.primary)
+                        resultTextView.setTextColor(resolvedColor)
 
-                        if( result != null && result != "") {
-                            "$result".also { resultTextView.text = it }
-                        } else {
-                            "You haven't done any <1km trips yet".also { resultTextView.text = it }
-                        }
+                        val likeImageView = binding.likeImageView
+                        likeImageView.visibility = View.VISIBLE
 
-                        when (result) {
-                            "Great! You are very green, keep it up!" -> {
-                                val resolvedColor = ContextCompat.getColor(requireContext(), R.color.primary)
-                                resultTextView.setTextColor(resolvedColor)
+                        val dislikeImageView = binding.dislikeImageView
+                        dislikeImageView.visibility = View.INVISIBLE
+                    }
+                    "Bad! You are below the general average." -> {
+                        resultTextView.setTextColor(Color.RED)
 
-                                val likeImageView = binding.likeImageView
-                                likeImageView.visibility = View.VISIBLE
+                        val dislikeImageView = binding.dislikeImageView
+                        dislikeImageView.visibility = View.VISIBLE
 
-                                val dislikeImageView = binding.dislikeImageView
-                                dislikeImageView.visibility = View.INVISIBLE
-                            }
-                            "Bad! You are below the general average." -> {
-                                resultTextView.setTextColor(Color.RED)
+                        val likeImageView = binding.likeImageView
+                        likeImageView.visibility = View.INVISIBLE
+                    }
+                    else -> {
+                        resultTextView.setTextColor(Color.RED)
 
-                                val dislikeImageView = binding.dislikeImageView
-                                dislikeImageView.visibility = View.VISIBLE
+                        val likeImageView = binding.likeImageView
+                        likeImageView.visibility = View.INVISIBLE
 
-                                val likeImageView = binding.likeImageView
-                                likeImageView.visibility = View.INVISIBLE
-                            }
-                            else -> {
-                                resultTextView.setTextColor(Color.RED)
-
-                                val likeImageView = binding.likeImageView
-                                likeImageView.visibility = View.INVISIBLE
-
-                                val dislikeImageView = binding.dislikeImageView
-                                dislikeImageView.visibility = View.INVISIBLE
-                            }
-                        }
-
-                        resultTextView.visibility = View.VISIBLE
-
-                    } else {
-                        // User document does not exist
-                        val message = "User document does not exist"
-                        val duration = Toast.LENGTH_LONG
-                        val toast = Toast.makeText(context, message, duration)
-                        toast.show()
+                        val dislikeImageView = binding.dislikeImageView
+                        dislikeImageView.visibility = View.INVISIBLE
                     }
                 }
-                .addOnFailureListener { exception ->
-                    // Handle any errors here
-                    val message = "${exception.message}"
-                    val duration = Toast.LENGTH_LONG
-                    val toast = Toast.makeText(context, message, duration)
-                    toast.show()
-                }
+
+                resultTextView.visibility = View.VISIBLE
+
+            },
+            onFailure = { errorMessage ->
+                util.showToast(errorMessage)
+            })
+
         }
         return binding.root
     }
@@ -201,89 +187,75 @@ class Schedule2Fragment : Fragment() {
 
     private lateinit var binding: Schedule2Binding
 
-    private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
+    private lateinit var util: Util
+
+    private lateinit var authManager : FirebaseAuthManager
+    private lateinit var firestoreManager: FirestoreManager
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         binding = Schedule2Binding.inflate(inflater, container, false)
 
-        // initialize firebase authentication
-        auth = FirebaseAuth.getInstance()
-        // initialize firebase firestore
-        db = FirebaseFirestore.getInstance()
+        util = context?.let { Util(it, null) }!!
 
-        // Get the currently signed-in user
-        val currentUser = auth.currentUser
+        // initialize firebase firestore manager
+        firestoreManager = FirestoreManager()
+        // initialize firebase authentication manager
+        authManager = FirebaseAuthManager(null, null, firestoreManager)
 
         // Retrieve the user ID
-        val userID = currentUser?.uid
+        val userID = authManager.getUserID()
 
         if (userID != null) {
-            // Get a reference to the user document
-            val userRef = db.collection("users").document(userID)
+            firestoreManager.getUserResultRange(userID, "last_1-5km",
+                onSuccess = { result ->
+                    // add text view to see result
+                    val resultTextView: TextView = binding.textViewSchedule2
 
-            // Get the user data
-            userRef.get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        val result = document.getString("last_1-5km")
-
-                        // add text view to see result
-                        val resultTextView: TextView = binding.textViewSchedule2
-
-                        if( result != null && result != "") {
-                            "$result".also { resultTextView.text = it }
-                        } else {
-                            "You haven't done any 1-5km trips yet".also { resultTextView.text = it }
-                        }
-
-                        when (result) {
-                            "Great! You are very green, keep it up!" -> {
-                                val resolvedColor = ContextCompat.getColor(requireContext(), R.color.primary)
-                                resultTextView.setTextColor(resolvedColor)
-
-                                val likeImageView = binding.likeImageView
-                                likeImageView.visibility = View.VISIBLE
-
-                                val dislikeImageView = binding.dislikeImageView
-                                dislikeImageView.visibility = View.INVISIBLE
-                            }
-
-                            "Bad! You are below the general average." -> {
-                                resultTextView.setTextColor(Color.RED)
-
-                                val dislikeImageView = binding.dislikeImageView
-                                dislikeImageView.visibility = View.VISIBLE
-
-                                val likeImageView = binding.likeImageView
-                                likeImageView.visibility = View.INVISIBLE
-                            } else -> {
-                                resultTextView.setTextColor(Color.RED)
-
-                                val likeImageView = binding.likeImageView
-                                likeImageView.visibility = View.INVISIBLE
-
-                                val dislikeImageView = binding.dislikeImageView
-                                dislikeImageView.visibility = View.INVISIBLE
-                            }
-                        }
-                        resultTextView.visibility = View.VISIBLE
+                    if( result != null && result != "") {
+                        "$result".also { resultTextView.text = it }
                     } else {
-                        // User document does not exist
-                        val message = "User document does not exist"
-                        val duration = Toast.LENGTH_LONG
-                        val toast = Toast.makeText(context, message, duration)
-                        toast.show()
+                        "You haven't done any 1-5km trips yet".also { resultTextView.text = it }
                     }
-                }
-                .addOnFailureListener { exception ->
-                    // Handle any errors here
-                    val message = "${exception.message}"
-                    val duration = Toast.LENGTH_LONG
-                    val toast = Toast.makeText(context, message, duration)
-                    toast.show()
-                }
+
+                    when (result) {
+                        "Great! You are very green, keep it up!" -> {
+                            val resolvedColor = ContextCompat.getColor(requireContext(), R.color.primary)
+                            resultTextView.setTextColor(resolvedColor)
+
+                            val likeImageView = binding.likeImageView
+                            likeImageView.visibility = View.VISIBLE
+
+                            val dislikeImageView = binding.dislikeImageView
+                            dislikeImageView.visibility = View.INVISIBLE
+                        }
+                        "Bad! You are below the general average." -> {
+                            resultTextView.setTextColor(Color.RED)
+
+                            val dislikeImageView = binding.dislikeImageView
+                            dislikeImageView.visibility = View.VISIBLE
+
+                            val likeImageView = binding.likeImageView
+                            likeImageView.visibility = View.INVISIBLE
+                        }
+                        else -> {
+                            resultTextView.setTextColor(Color.RED)
+
+                            val likeImageView = binding.likeImageView
+                            likeImageView.visibility = View.INVISIBLE
+
+                            val dislikeImageView = binding.dislikeImageView
+                            dislikeImageView.visibility = View.INVISIBLE
+                        }
+                    }
+
+                    resultTextView.visibility = View.VISIBLE
+
+                },
+                onFailure = { errorMessage ->
+                    util.showToast(errorMessage)
+                })
+
         }
         return binding.root
     }
@@ -293,90 +265,75 @@ class Schedule3Fragment : Fragment() {
 
     private lateinit var binding: Schedule3Binding
 
-    private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
+    private lateinit var util: Util
+
+    private lateinit var authManager : FirebaseAuthManager
+    private lateinit var firestoreManager: FirestoreManager
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         binding = Schedule3Binding.inflate(inflater, container, false)
 
-        // initialize firebase authentication
-        auth = FirebaseAuth.getInstance()
-        // initialize firebase firestore
-        db = FirebaseFirestore.getInstance()
+        util = context?.let { Util(it, null) }!!
 
-        // Get the currently signed-in user
-        val currentUser = auth.currentUser
+        // initialize firebase firestore manager
+        firestoreManager = FirestoreManager()
+        // initialize firebase authentication manager
+        authManager = FirebaseAuthManager(null, null, firestoreManager)
 
         // Retrieve the user ID
-        val userID = currentUser?.uid
+        val userID = authManager.getUserID()
 
         if (userID != null) {
-            // Get a reference to the user document
-            val userRef = db.collection("users").document(userID)
+            firestoreManager.getUserResultRange(userID, "last_5-10km",
+                onSuccess = { result ->
+                    // add text view to see result
+                    val resultTextView: TextView = binding.textViewSchedule3
 
-            // Get the user data
-            userRef.get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        val result = document.getString("last_5-10km")
-
-                        // add text view to see result
-                        val resultTextView: TextView = binding.textViewSchedule3
-
-                        if( result != null && result != "") {
-                            "$result".also { resultTextView.text = it }
-                        } else {
-                            "You haven't done any 5-10km trips yet".also { resultTextView.text = it }
-                        }
-
-                        when (result) {
-                            "Great! You are very green, keep it up!" -> {
-                                val resolvedColor = ContextCompat.getColor(requireContext(), R.color.primary)
-                                resultTextView.setTextColor(resolvedColor)
-
-                                val likeImageView = binding.likeImageView
-                                likeImageView.visibility = View.VISIBLE
-
-                                val dislikeImageView = binding.dislikeImageView
-                                dislikeImageView.visibility = View.INVISIBLE
-                            }
-                            "Bad! You are below the general average." -> {
-                                resultTextView.setTextColor(Color.RED)
-
-                                val dislikeImageView = binding.dislikeImageView
-                                dislikeImageView.visibility = View.VISIBLE
-
-                                val likeImageView = binding.likeImageView
-                                likeImageView.visibility = View.INVISIBLE
-                            }
-                            else -> {
-                                resultTextView.setTextColor(Color.RED)
-
-                                val likeImageView = binding.likeImageView
-                                likeImageView.visibility = View.INVISIBLE
-
-                                val dislikeImageView = binding.dislikeImageView
-                                dislikeImageView.visibility = View.INVISIBLE
-                            }
-                        }
-
-                        resultTextView.visibility = View.VISIBLE
+                    if( result != null && result != "") {
+                        "$result".also { resultTextView.text = it }
                     } else {
-                        // User document does not exist
-                        val message = "User document does not exist"
-                        val duration = Toast.LENGTH_LONG
-                        val toast = Toast.makeText(context, message, duration)
-                        toast.show()
+                        "You haven't done any 5-10km trips yet".also { resultTextView.text = it }
                     }
-                }
-                .addOnFailureListener { exception ->
-                    // Handle any errors here
-                    val message = "${exception.message}"
-                    val duration = Toast.LENGTH_LONG
-                    val toast = Toast.makeText(context, message, duration)
-                    toast.show()
-                }
+
+                    when (result) {
+                        "Great! You are very green, keep it up!" -> {
+                            val resolvedColor = ContextCompat.getColor(requireContext(), R.color.primary)
+                            resultTextView.setTextColor(resolvedColor)
+
+                            val likeImageView = binding.likeImageView
+                            likeImageView.visibility = View.VISIBLE
+
+                            val dislikeImageView = binding.dislikeImageView
+                            dislikeImageView.visibility = View.INVISIBLE
+                        }
+                        "Bad! You are below the general average." -> {
+                            resultTextView.setTextColor(Color.RED)
+
+                            val dislikeImageView = binding.dislikeImageView
+                            dislikeImageView.visibility = View.VISIBLE
+
+                            val likeImageView = binding.likeImageView
+                            likeImageView.visibility = View.INVISIBLE
+                        }
+                        else -> {
+                            resultTextView.setTextColor(Color.RED)
+
+                            val likeImageView = binding.likeImageView
+                            likeImageView.visibility = View.INVISIBLE
+
+                            val dislikeImageView = binding.dislikeImageView
+                            dislikeImageView.visibility = View.INVISIBLE
+                        }
+                    }
+
+                    resultTextView.visibility = View.VISIBLE
+
+                },
+                onFailure = { errorMessage ->
+                    util.showToast(errorMessage)
+                })
+
         }
         return binding.root
     }
@@ -386,90 +343,75 @@ class Schedule4Fragment : Fragment() {
 
     private lateinit var binding: Schedule4Binding
 
-    private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
+    private lateinit var util: Util
+
+    private lateinit var authManager : FirebaseAuthManager
+    private lateinit var firestoreManager: FirestoreManager
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 
         binding = Schedule4Binding.inflate(inflater, container, false)
 
-        // initialize firebase authentication
-        auth = FirebaseAuth.getInstance()
-        // initialize firebase firestore
-        db = FirebaseFirestore.getInstance()
+        util = context?.let { Util(it, null) }!!
 
-        // Get the currently signed-in user
-        val currentUser = auth.currentUser
+        // initialize firebase firestore manager
+        firestoreManager = FirestoreManager()
+        // initialize firebase authentication manager
+        authManager = FirebaseAuthManager(null, null, firestoreManager)
 
         // Retrieve the user ID
-        val userID = currentUser?.uid
+        val userID = authManager.getUserID()
 
         if (userID != null) {
-            // Get a reference to the user document
-            val userRef = db.collection("users").document(userID)
+            firestoreManager.getUserResultRange(userID, "last_>10km",
+                onSuccess = { result ->
+                    // add text view to see result
+                    val resultTextView: TextView = binding.textViewSchedule4
 
-            // Get the user data
-            userRef.get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        val result = document.getString("last_>10km")
-
-                        // add text view to see result
-                        val resultTextView: TextView = binding.textViewSchedule4
-
-                        if( result != null && result != "") {
-                            "$result".also { resultTextView.text = it }
-                        } else {
-                            "You haven't done any >10km trips yet".also { resultTextView.text = it }
-                        }
-
-                        when (result) {
-                            "Great! You are very green, keep it up!" -> {
-                                val resolvedColor = ContextCompat.getColor(requireContext(), R.color.primary)
-                                resultTextView.setTextColor(resolvedColor)
-
-                                val likeImageView = binding.likeImageView
-                                likeImageView.visibility = View.VISIBLE
-
-                                val dislikeImageView = binding.dislikeImageView
-                                dislikeImageView.visibility = View.INVISIBLE
-                            }
-                            "Bad! You are below the general average." -> {
-                                resultTextView.setTextColor(Color.RED)
-
-                                val dislikeImageView = binding.dislikeImageView
-                                dislikeImageView.visibility = View.VISIBLE
-
-                                val likeImageView = binding.likeImageView
-                                likeImageView.visibility = View.INVISIBLE
-                            }
-                            else -> {
-                                resultTextView.setTextColor(Color.RED)
-
-                                val likeImageView = binding.likeImageView
-                                likeImageView.visibility = View.INVISIBLE
-
-                                val dislikeImageView = binding.dislikeImageView
-                                dislikeImageView.visibility = View.INVISIBLE
-                            }
-                        }
-
-                        resultTextView.visibility = View.VISIBLE
+                    if( result != null && result != "") {
+                        "$result".also { resultTextView.text = it }
                     } else {
-                        // User document does not exist
-                        val message = "User document does not exist"
-                        val duration = Toast.LENGTH_LONG
-                        val toast = Toast.makeText(context, message, duration)
-                        toast.show()
+                        "You haven't done any >10km trips yet".also { resultTextView.text = it }
                     }
-                }
-                .addOnFailureListener { exception ->
-                    // Handle any errors here
-                    val message = "${exception.message}"
-                    val duration = Toast.LENGTH_LONG
-                    val toast = Toast.makeText(context, message, duration)
-                    toast.show()
-                }
+
+                    when (result) {
+                        "Great! You are very green, keep it up!" -> {
+                            val resolvedColor = ContextCompat.getColor(requireContext(), R.color.primary)
+                            resultTextView.setTextColor(resolvedColor)
+
+                            val likeImageView = binding.likeImageView
+                            likeImageView.visibility = View.VISIBLE
+
+                            val dislikeImageView = binding.dislikeImageView
+                            dislikeImageView.visibility = View.INVISIBLE
+                        }
+                        "Bad! You are below the general average." -> {
+                            resultTextView.setTextColor(Color.RED)
+
+                            val dislikeImageView = binding.dislikeImageView
+                            dislikeImageView.visibility = View.VISIBLE
+
+                            val likeImageView = binding.likeImageView
+                            likeImageView.visibility = View.INVISIBLE
+                        }
+                        else -> {
+                            resultTextView.setTextColor(Color.RED)
+
+                            val likeImageView = binding.likeImageView
+                            likeImageView.visibility = View.INVISIBLE
+
+                            val dislikeImageView = binding.dislikeImageView
+                            dislikeImageView.visibility = View.INVISIBLE
+                        }
+                    }
+
+                    resultTextView.visibility = View.VISIBLE
+
+                },
+                onFailure = { errorMessage ->
+                    util.showToast(errorMessage)
+                })
+
         }
         return binding.root
     }
