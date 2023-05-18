@@ -6,24 +6,28 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
+import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
 
-class Util(context: Context, binding: ActivityMainBinding) {
+class Util(context: Context, mainBinding: ActivityMainBinding?, recordingBinding: ActivityRecordingBinding?) {
     // initialize application context
     private val appContext = context
 
-    // initialize activity main binding
-    private val appMainBinding = binding
+    // initialize activity binding
+    private val appMainBinding = mainBinding
+    private val appRecordingBinding = recordingBinding
 
-    fun showErrorToast(message: String) {
+    fun showToast(message: String) {
         val duration = Toast.LENGTH_LONG
         val toast = Toast.makeText(appContext, message, duration)
         toast.show()
     }
 
     fun showErrorTextView(message: String){
-        val errorTextView: TextView = appMainBinding.errorTextView
-        errorTextView.text = message
-        errorTextView.setTextColor(Color.RED)
-        errorTextView.visibility = View.VISIBLE
+        if (appMainBinding != null) {
+            val errorTextView: TextView = appMainBinding.errorTextView
+            errorTextView.text = message
+            errorTextView.setTextColor(Color.RED)
+            errorTextView.visibility = View.VISIBLE
+        }
     }
 }

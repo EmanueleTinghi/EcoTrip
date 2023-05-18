@@ -1,19 +1,10 @@
 package it.unipi.dii.masss_project
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import com.google.firebase.auth.EmailAuthProvider
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
 
 
@@ -33,7 +24,7 @@ class MainActivity : AppCompatActivity() {
             this, R.layout.activity_main)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        util = Util(this, binding)
+        util = Util(this, binding, null)
 
         // initialize firebase firestore manager
         firestoreManager = FirestoreManager()
@@ -75,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                 }
             } else {
                 // Otherwise show error message
-                util.showErrorToast("Insert email and password, please")
+                util.showToast("Insert email and password, please")
             }
         }
     }

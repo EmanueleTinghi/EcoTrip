@@ -32,6 +32,8 @@ class RecordingActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRecordingBinding
 
+    private lateinit var util: Util
+
     private lateinit var username: String
 
     private var gyroscope: SensorGyroscope? = null
@@ -73,6 +75,8 @@ class RecordingActivity : AppCompatActivity() {
         binding= DataBindingUtil.setContentView(
             this, R.layout.activity_recording)
 
+        util = Util(this, null, binding)
+
         // initialize firebase authentication
         auth = FirebaseAuth.getInstance()
         // initialize firebase firestore
@@ -82,6 +86,7 @@ class RecordingActivity : AppCompatActivity() {
         progress = "Start"
 
         // initialize location manager
+        val c = Context.LOCATION_SERVICE
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         // initialize location listener
         initializeLocationListener()
@@ -115,10 +120,7 @@ class RecordingActivity : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         } else {
-            val message = "You have to stop recording first"
-            val duration = Toast.LENGTH_LONG
-            val toast = Toast.makeText(this, message, duration)
-            toast.show()
+            util.showToast("You have to stop recording first")
         }
     }
 
@@ -133,10 +135,7 @@ class RecordingActivity : AppCompatActivity() {
             val resultButton: Button = binding.resultButton
             resultButton.visibility = View.INVISIBLE
 
-            val message = "Start transportation mode detection"
-            val duration = Toast.LENGTH_LONG
-            val toast = Toast.makeText(this, message, duration)
-            toast.show()
+            util.showToast("Start transportation mode detection")
 
             /**************** Get an instance of the SensorManager ****************/
             val sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -182,10 +181,7 @@ class RecordingActivity : AppCompatActivity() {
             val resultButton: Button = binding.resultButton
             resultButton.visibility = View.VISIBLE
 
-            val message = "Stop transportation mode detection"
-            val duration = Toast.LENGTH_LONG
-            val toast = Toast.makeText(this, message, duration)
-            toast.show()
+            util.showToast("Stop transportation mode detection")
 
             // retrieve user current location - end point
             // and calculate distance between start and end points
@@ -349,11 +345,7 @@ class RecordingActivity : AppCompatActivity() {
                 }
             }
         }.addOnFailureListener { exception ->
-            // Handle any errors here
-            val message = "${exception.message}"
-            val duration = Toast.LENGTH_LONG
-            val toast = Toast.makeText(this, message, duration)
-            toast.show()
+            exception.message?.let { util.showToast(it) }
         }
 
         // Get the currently signed-in user
@@ -414,10 +406,7 @@ class RecordingActivity : AppCompatActivity() {
                 }
                 .addOnFailureListener { exception ->
                     // Handle any errors here
-                    val message = "${exception.message}"
-                    val duration = Toast.LENGTH_LONG
-                    val toast = Toast.makeText(this, message, duration)
-                    toast.show()
+                    exception.message?.let { util.showToast(it) }
                 }
         }
 
@@ -443,11 +432,7 @@ class RecordingActivity : AppCompatActivity() {
                 }
             }
         }.addOnFailureListener { exception ->
-            // Handle any errors here
-            val message = "${exception.message}"
-            val duration = Toast.LENGTH_LONG
-            val toast = Toast.makeText(this, message, duration)
-            toast.show()
+            exception.message?.let { util.showToast(it) }
         }
 
         if (userID != null) {
@@ -476,10 +461,7 @@ class RecordingActivity : AppCompatActivity() {
                 }
                 .addOnFailureListener { exception ->
                     // Handle any errors here
-                    val message = "${exception.message}"
-                    val duration = Toast.LENGTH_LONG
-                    val toast = Toast.makeText(this, message, duration)
-                    toast.show()
+                    exception.message?.let { util.showToast(it) }
                 }
         }
 
@@ -498,10 +480,7 @@ class RecordingActivity : AppCompatActivity() {
                 }
                 .addOnFailureListener { exception ->
                     // Handle any errors here
-                    val message = "${exception.message}"
-                    val duration = Toast.LENGTH_LONG
-                    val toast = Toast.makeText(this, message, duration)
-                    toast.show()
+                    exception.message?.let { util.showToast(it) }
                 }
         }
     }

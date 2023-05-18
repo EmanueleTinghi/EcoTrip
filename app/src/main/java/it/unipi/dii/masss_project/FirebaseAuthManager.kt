@@ -33,7 +33,7 @@ class FirebaseAuthManager(context: Context, binding: ActivityMainBinding,
                     }
                 }else {
                     // handle error
-                    util.showErrorToast("Error in checking user existence")
+                    util.showToast("Error in checking user existence")
                     task.exception?.message?.let { util.showErrorTextView(it) }
                 }
             }
@@ -45,7 +45,7 @@ class FirebaseAuthManager(context: Context, binding: ActivityMainBinding,
                 if (task.isSuccessful) {
                     callback(true)
                 } else {
-                    util.showErrorToast("Authentication failed")
+                    util.showToast("Authentication failed")
                     task.exception?.message?.let { util.showErrorTextView(it) }
                     callback(false)
                 }
@@ -66,7 +66,7 @@ class FirebaseAuthManager(context: Context, binding: ActivityMainBinding,
                         callback(false)
                     }
                 } else {
-                    util.showErrorToast("Registration failed")
+                    util.showToast("Registration failed")
                     task.exception?.message?.let { util.showErrorTextView(it) }
                     callback(false)
                 }
