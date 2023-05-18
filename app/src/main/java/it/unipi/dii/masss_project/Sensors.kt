@@ -106,7 +106,7 @@ class SensorMagneticField(private val sensorManager: SensorManager,
         // Do something when the accelerometer sensor accuracy changes
     }
 
-    // Register the accelerometer sensor listener when the MagneticFieldManager object is created
+    // Register the magneticField sensor listener when the MagneticFieldManager object is created
     init {
         sensorManager.registerListener(this, magneticFieldSensor, SensorManager.SENSOR_DELAY_NORMAL)
     }

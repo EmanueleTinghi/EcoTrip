@@ -28,7 +28,7 @@ import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
 
 class RecordingActivity : AppCompatActivity() {
 
-    private lateinit var sensorsCollector: SensorsCollector
+    private lateinit var classificationModule: ClassificationModule
 
     private lateinit var binding: ActivityRecordingBinding
 
@@ -63,7 +63,7 @@ class RecordingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sensorsCollector = SensorsCollector(applicationContext)
+        classificationModule = ClassificationModule(applicationContext)
         // to keep screen on
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -143,17 +143,17 @@ class RecordingActivity : AppCompatActivity() {
 
             /********************          Accelerometer          ********************/
             //Initialize the accelerometer sensor
-            accelerometer = SensorAccelerometer(sensorManager, sensorsCollector)
+            accelerometer = SensorAccelerometer(sensorManager, classificationModule.sensorsCollector)
             accelerometer!!.start()
 
             /********************          MagneticField          ********************/
             //Initialize the magneticField sensor
-            magneticField = SensorMagneticField(sensorManager, sensorsCollector)
+            magneticField = SensorMagneticField(sensorManager, classificationModule.sensorsCollector)
             magneticField!!.start()
 
             /********************          Gyroscope          ********************/
             //Initialize the gyroscope sensor
-            gyroscope = SensorGyroscope(sensorManager, sensorsCollector)
+            gyroscope = SensorGyroscope(sensorManager, classificationModule.sensorsCollector)
             gyroscope!!.start()
 
             /****************           GPS              ****************/
@@ -162,7 +162,7 @@ class RecordingActivity : AppCompatActivity() {
             getLocation()
 
             /****************           Starting collection sampling              ****************/
-            sensorsCollector.startCollection()
+            classificationModule.startClassification()
 
         } else {
             progress = "Stop"
@@ -171,7 +171,7 @@ class RecordingActivity : AppCompatActivity() {
             accelerometer!!.stop()
             magneticField!!.stop()
 
-            meansOfTransportDetected = sensorsCollector.stopCollection()
+            meansOfTransportDetected = classificationModule.stopClassification()
             println("class label $meansOfTransportDetected")
 
             // Block the user in this activity until stopped recording
