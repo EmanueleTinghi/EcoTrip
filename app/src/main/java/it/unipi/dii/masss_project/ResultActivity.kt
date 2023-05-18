@@ -15,6 +15,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.google.android.material.tabs.TabLayout
+import it.unipi.dii.masss_project.database.FirebaseAuthManager
+import it.unipi.dii.masss_project.database.FirestoreManager
 import it.unipi.dii.masss_project.databinding.ActivityResultBinding
 import it.unipi.dii.masss_project.databinding.Schedule1Binding
 import it.unipi.dii.masss_project.databinding.Schedule2Binding

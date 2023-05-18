@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import it.unipi.dii.masss_project.database.FirebaseAuthManager
+import it.unipi.dii.masss_project.database.FirestoreManager
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
 
 

@@ -1,9 +1,10 @@
-package it.unipi.dii.masss_project
+package it.unipi.dii.masss_project.database
 
 import android.content.Context
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import it.unipi.dii.masss_project.Util
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
 
 class FirebaseAuthManager(

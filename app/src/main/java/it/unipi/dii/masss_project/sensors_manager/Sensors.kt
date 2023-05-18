@@ -1,4 +1,4 @@
-package it.unipi.dii.masss_project
+package it.unipi.dii.masss_project.sensors_manager
 
 
 import android.hardware.Sensor
@@ -9,7 +9,8 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 class SensorGyroscope(private val sensorManager: SensorManager,
-                      private val sensorsCollector: SensorsCollector) : SensorEventListener {
+                      private val sensorsCollector: SensorsCollector
+) : SensorEventListener {
 
     private val gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
 
@@ -47,7 +48,8 @@ class SensorGyroscope(private val sensorManager: SensorManager,
 }
 
 class SensorAccelerometer(private val sensorManager: SensorManager,
-                          private val sensorsCollector: SensorsCollector) : SensorEventListener {
+                          private val sensorsCollector: SensorsCollector
+) : SensorEventListener {
 
     // Define variables to store the sensor manager and the accelerometer sensor
     private val accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -85,7 +87,8 @@ class SensorAccelerometer(private val sensorManager: SensorManager,
 }
 
 class SensorMagneticField(private val sensorManager: SensorManager,
-                         private val sensorsCollector: SensorsCollector) : SensorEventListener {
+                         private val sensorsCollector: SensorsCollector
+) : SensorEventListener {
 
     // Define variables to store the sensor manager and the magneticField sensor
     private val magneticFieldSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)

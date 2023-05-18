@@ -1,7 +1,8 @@
-package it.unipi.dii.masss_project
+package it.unipi.dii.masss_project.classification
 
 import android.content.Context
 import android.util.Log
+import it.unipi.dii.masss_project.sensors_manager.SensorsCollector
 import weka.core.Attribute
 import weka.core.DenseInstance
 import weka.core.Instances
@@ -80,7 +81,7 @@ class ClassificationModule (applicationContext: Context) {
         timer.schedule(object : TimerTask() {
             override fun run() {
                 handleClassification(
-                    sensorsCollector.getFeaturesSamples(data.numAttributes()-1)
+                    sensorsCollector.getFeatures(data.numAttributes()-1)
                 )
             }
         }, 5000, 5000)

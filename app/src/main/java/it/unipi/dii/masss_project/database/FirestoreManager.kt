@@ -1,4 +1,4 @@
-package it.unipi.dii.masss_project
+package it.unipi.dii.masss_project.database
 
 import android.content.ContentValues
 import android.util.Log
@@ -7,6 +7,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
+import it.unipi.dii.masss_project.Util
 
 class FirestoreManager {
     // initialize firebase firestore

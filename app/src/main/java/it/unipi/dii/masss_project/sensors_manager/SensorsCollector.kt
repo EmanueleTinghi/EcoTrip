@@ -1,4 +1,4 @@
-package it.unipi.dii.masss_project
+package it.unipi.dii.masss_project.sensors_manager
 
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.pow
@@ -14,7 +14,7 @@ class SensorsCollector {
     private val lockGyroscope = ReentrantLock()
     private val lockMagneticField = ReentrantLock()
 
-    fun getFeaturesSamples(numFeature: Int): DoubleArray {
+    fun getFeatures(numFeature: Int): DoubleArray {
         val values = DoubleArray(numFeature)
         lockAccelerometer.lock()
         try {

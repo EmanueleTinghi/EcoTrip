@@ -1,4 +1,4 @@
-package it.unipi.dii.masss_project
+package it.unipi.dii.masss_project.location_manager
 
 import android.content.Context
 import android.location.Geocoder
