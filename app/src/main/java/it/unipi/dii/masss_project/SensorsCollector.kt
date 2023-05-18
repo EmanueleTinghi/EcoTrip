@@ -202,7 +202,10 @@ class SensorsCollector(applicationContext: Context) {
             override fun run() {
                 // Do something after a certain period of time
                 val ret = classify()
-                resultClassification[ret] = resultClassification[ret]?.plus(1) ?: 1
+                if (ret == "still")
+                    resultClassification[ret] = 1
+                else
+                    resultClassification[ret] = resultClassification[ret]?.plus(1) ?: 1
             }
         }, 5000, 5000)
     }
