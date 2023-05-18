@@ -48,6 +48,8 @@ class GPSHandler(context: Context) {
 
                 when (progress) {
                     "Start" -> {
+                        distances.clear()
+
                         // start point
                         startPoint.latitude = latitude
                         startPoint.longitude = longitude

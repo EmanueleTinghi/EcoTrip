@@ -137,6 +137,7 @@ class RecordingActivity : AppCompatActivity() {
 
             /****************           GPS              ****************/
             // retrieve user current location - start point
+            gpsHandler.progress = "Start"
             getLocation()
 
             /****************           Starting collection sampling              ****************/
@@ -201,7 +202,7 @@ class RecordingActivity : AppCompatActivity() {
             println("FINAL DISTANCE: $finalDistance km")
 
             // empty distances list
-            gpsHandler.distances.clear()
+            //gpsHandler.distances.clear()
 
             gpsHandler.stopReceivingUpdates()
 
@@ -268,7 +269,7 @@ class RecordingActivity : AppCompatActivity() {
                             if (meansOfTransportDetected != "still") {
                                 // user have aggregate results for start city -> update aggregate results
                                 val increment = FieldValue.increment(1)
-                                val fieldPath = "results.$gpsHandler.startCity." + initializeFieldPath()
+                                val fieldPath = "results.${gpsHandler.startCity}." + initializeFieldPath()
                                 val docRef = document.reference
                                 docRef.update(fieldPath, increment)
                                     .addOnSuccessListener {
@@ -289,7 +290,7 @@ class RecordingActivity : AppCompatActivity() {
                             // user have no aggregate results for start city -> insert new aggregate results in results map
                             val aggregateResults = initializeAggregateResults()
                             val docRef = document.reference
-                            docRef.update("results.$gpsHandler.startCity", aggregateResults)
+                            docRef.update("results.${gpsHandler.startCity}", aggregateResults)
                                 .addOnSuccessListener { Log.d(TAG, "Added new aggregate results for new city in user collection") }
                                 .addOnFailureListener { e -> Log.w(TAG, "Error adding new aggregate results for new city in user collection", e) }
                         }
@@ -312,9 +313,8 @@ class RecordingActivity : AppCompatActivity() {
         }
 
         // calculate green score
-        var generalWeightedAverage = 0.0
-        var userWeightedAverage = 0.0
-
+        var generalWeightedAverage: Double = 0.0
+        var userWeightedAverage: Double = 0.0
         val query2 = db.collection("aggregateResults").whereEqualTo("city", gpsHandler.startCity)
         query2.get().addOnSuccessListener { documents ->
             if (!documents.isEmpty) {
@@ -325,64 +325,57 @@ class RecordingActivity : AppCompatActivity() {
                     val totTrain = travelDistance["train"] as Long
                     val totWalking = travelDistance["walking"] as Long
                     val totCar = travelDistance["car"] as Long
-                    if ((totBus.toDouble() + totTrain.toDouble() + totWalking.toDouble() + totCar.toDouble()) != 0.0) {
-                        generalWeightedAverage = (totBus.toDouble() * busScore + totTrain.toDouble() * trainScore + totWalking.toDouble() * walkingScore + totCar.toDouble() * carScore) /
+                    generalWeightedAverage = if ((totBus.toDouble() + totTrain.toDouble() + totWalking.toDouble() + totCar.toDouble()) != 0.0) {
+                        (totBus.toDouble() * busScore + totTrain.toDouble() * trainScore + totWalking.toDouble() * walkingScore + totCar.toDouble() * carScore) /
                                 (totBus.toDouble() + totTrain.toDouble() + totWalking.toDouble() + totCar.toDouble())
+                    } else {
+                        0.0
                     }
                     println("General Weighted Average: $generalWeightedAverage")
                 }
             }
-        }.addOnFailureListener { exception ->
-            exception.message?.let { util.showToast(it) }
-        }
-
-        if (userID != null) {
-            val userRef = db.collection("users").document(userID)
-            userRef.get()
-                .addOnSuccessListener { document ->
-                    if (document.data?.containsKey("results") == true) {
-                        val results = document.data?.get("results") as HashMap<*, *>
-                        if (results.containsKey(gpsHandler.startCity)) {
-                            val range = getRange()
-                            val aggregateResults = results[gpsHandler.startCity] as HashMap<*, *>
-                            val travelDistances = aggregateResults["travelDistances"] as HashMap<*, *>
-                            val travelDistance = travelDistances[range] as HashMap<*, *>
-                            val totBus = travelDistance["bus"] as Long
-                            val totTrain = travelDistance["train"] as Long
-                            val totWalking = travelDistance["walking"] as Long
-                            val totCar = travelDistance["car"] as Long
-                            if ((totBus.toDouble() + totTrain.toDouble() + totWalking.toDouble() + totCar.toDouble()) != 0.0) {
-                                userWeightedAverage =
+            if (userID != null) {
+                val userRef = db.collection("users").document(userID)
+                userRef.get()
+                    .addOnSuccessListener { document ->
+                        if (document.data?.containsKey("results") == true) {
+                            val results = document.data?.get("results") as HashMap<*, *>
+                            if (results.containsKey(gpsHandler.startCity)) {
+                                val range = getRange()
+                                val aggregateResults = results[gpsHandler.startCity] as HashMap<*, *>
+                                val travelDistances = aggregateResults["travelDistances"] as HashMap<*, *>
+                                val travelDistance = travelDistances[range] as HashMap<*, *>
+                                val totBus = travelDistance["bus"] as Long
+                                val totTrain = travelDistance["train"] as Long
+                                val totWalking = travelDistance["walking"] as Long
+                                val totCar = travelDistance["car"] as Long
+                                userWeightedAverage = if ((totBus.toDouble() + totTrain.toDouble() + totWalking.toDouble() + totCar.toDouble()) != 0.0) {
                                     (totBus.toDouble() * busScore + totTrain.toDouble() * trainScore + totWalking.toDouble() * walkingScore + totCar.toDouble() * carScore) /
                                             (totBus.toDouble() + totTrain.toDouble() + totWalking.toDouble() + totCar.toDouble())
+                                } else {
+                                    0.0
+                                }
+                                println("User Weighted Average: $userWeightedAverage")
                             }
-                            println("User Weighted Average: $userWeightedAverage")
                         }
+                        val green = if (userWeightedAverage >= generalWeightedAverage){
+                            println("green")
+                            "Great! You are very green, keep it up!"
+                        } else {
+                            println("not green")
+                            "Bad! You are below the general average."
+                        }
+                        val resultToUpdate = getFinalUserResultToUpdate()
+                        val docRef = document.reference
+                        docRef.update(resultToUpdate, green)
                     }
-                }
-                .addOnFailureListener { exception ->
-                    // Handle any errors here
-                    exception.message?.let { util.showToast(it) }
-                }
-        }
-
-        val green = if (userWeightedAverage >= generalWeightedAverage){
-            "Great! You are very green, keep it up!"
-        } else {
-            "Bad! You are below the general average."
-        }
-        if (userID != null) {
-            val userRef = db.collection("users").document(userID)
-            userRef.get()
-                .addOnSuccessListener { document ->
-                    val resultToUpdate = getFinalUserResultToUpdate()
-                    val docRef = document.reference
-                    docRef.update(resultToUpdate, green)
-                }
-                .addOnFailureListener { exception ->
-                    // Handle any errors here
-                    exception.message?.let { util.showToast(it) }
-                }
+                    .addOnFailureListener { exception ->
+                        // Handle any errors here
+                        exception.message?.let { util.showToast(it) }
+                    }
+            }
+        }.addOnFailureListener { exception ->
+            exception.message?.let { util.showToast(it) }
         }
     }
 
