@@ -6,15 +6,13 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import it.unipi.dii.masss_project.databinding.ActivityMainBinding
-import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
 
-class Util(context: Context, mainBinding: ActivityMainBinding?, recordingBinding: ActivityRecordingBinding?) {
+class Util(context: Context, mainBinding: ActivityMainBinding?) {
     // initialize application context
     private val appContext = context
 
     // initialize activity binding
     private val appMainBinding = mainBinding
-    private val appRecordingBinding = recordingBinding
 
     fun showToast(message: String) {
         val duration = Toast.LENGTH_LONG

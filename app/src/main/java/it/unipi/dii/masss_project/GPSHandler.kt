@@ -27,7 +27,7 @@ class GPSHandler(context: Context) {
 
     lateinit var startCity: String
 
-    val distances = mutableListOf<Double>()
+    var finalDistance: Double = 0.0
 
     init {
         // initialize location listener
@@ -48,7 +48,7 @@ class GPSHandler(context: Context) {
 
                 when (progress) {
                     "Start" -> {
-                        distances.clear()
+                        finalDistance = 0.0
 
                         // start point
                         startPoint.latitude = latitude
@@ -83,7 +83,7 @@ class GPSHandler(context: Context) {
                         // calculate distance between intermediate and end point
                         val distance = (startPoint.distanceTo(endPoint) / 1000.0)
                         println("DISTANCE: $distance km")
-                        distances.add(distance)
+                        finalDistance += distance
 
                         // Stop receiving location updates
                         locationManager.removeUpdates(locationListener)
@@ -98,7 +98,7 @@ class GPSHandler(context: Context) {
                         // calculate distance between start and intermediate point
                         val distance = (startPoint.distanceTo(endPoint) / 1000.0)
                         println("DISTANCE: $distance km")
-                        distances.add(distance)
+                        finalDistance += distance
 
                         // set new start point
                         startPoint.latitude = latitude

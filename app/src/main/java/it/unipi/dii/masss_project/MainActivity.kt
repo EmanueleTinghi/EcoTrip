@@ -24,13 +24,12 @@ class MainActivity : AppCompatActivity() {
             this, R.layout.activity_main)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        util = Util(this, binding, null)
+        util = Util(this, binding)
 
         // initialize firebase firestore manager
         firestoreManager = FirestoreManager()
-
         // initialize firebase authentication manager
-        authManager = FirebaseAuthManager(this, binding, null, firestoreManager)
+        authManager = FirebaseAuthManager(this, binding, firestoreManager)
 
         // add listener for loginButton
         val button: Button = binding.loginButton
