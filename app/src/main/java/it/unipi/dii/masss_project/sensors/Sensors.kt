@@ -1,4 +1,4 @@
-package it.unipi.dii.masss_project.sensors_manager
+package it.unipi.dii.masss_project.sensors
 
 
 import android.hardware.Sensor

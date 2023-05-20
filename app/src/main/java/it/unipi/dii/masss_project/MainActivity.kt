@@ -3,6 +3,7 @@ package it.unipi.dii.masss_project
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import it.unipi.dii.masss_project.database.FirebaseAuthManager
@@ -13,6 +14,8 @@ import it.unipi.dii.masss_project.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private lateinit var util: Util
+
+    private var numClicks = 0
 
     private lateinit var authManager : FirebaseAuthManager
     private lateinit var firestoreManager: FirestoreManager
@@ -36,6 +39,9 @@ class MainActivity : AppCompatActivity() {
         // add listener for loginButton
         val button: Button = binding.loginButton
         button.setOnClickListener{onLoginAttempt()}
+
+        val logo: ImageView = binding.imageView
+        logo.setOnClickListener{easterEgg()}
     }
 
     private fun onLoginAttempt() {
@@ -112,5 +118,26 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra("username", username)
         intent.putExtra("auth", email)
         startActivity(intent)
+    }
+
+    private fun easterEgg(){
+        numClicks++
+        if(numClicks == 3){
+            val logo: ImageView = binding.imageView
+            logo.animate().scaleX(-1f).withEndAction {
+                logo.setImageResource(R.drawable.beerzone_logo)
+                logo.animate().scaleX(1f).start()
+            }.start()
+        }
+        if(numClicks == 4){
+            val logo: ImageView = binding.imageView
+            logo.animate().scaleX(-1f).withEndAction {
+                logo.setImageResource(R.drawable.logo_eco)
+                logo.animate().scaleX(1f).start()
+            }.start()
+
+            numClicks = 0
+        }
+
     }
 }

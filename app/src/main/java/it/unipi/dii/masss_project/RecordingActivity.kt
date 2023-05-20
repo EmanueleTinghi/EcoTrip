@@ -11,14 +11,14 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
-import it.unipi.dii.masss_project.classification.ClassificationModule
+import it.unipi.dii.masss_project.classifier.ClassificationModule
 import it.unipi.dii.masss_project.database.FirebaseAuthManager
 import it.unipi.dii.masss_project.database.FirestoreManager
 import it.unipi.dii.masss_project.databinding.ActivityRecordingBinding
 import it.unipi.dii.masss_project.location_manager.GPSHandler
-import it.unipi.dii.masss_project.sensors_manager.SensorAccelerometer
-import it.unipi.dii.masss_project.sensors_manager.SensorGyroscope
-import it.unipi.dii.masss_project.sensors_manager.SensorMagneticField
+import it.unipi.dii.masss_project.sensors.SensorAccelerometer
+import it.unipi.dii.masss_project.sensors.SensorGyroscope
+import it.unipi.dii.masss_project.sensors.SensorMagneticField
 
 class RecordingActivity : AppCompatActivity() {
 

@@ -1,8 +1,8 @@
-package it.unipi.dii.masss_project.classification
+package it.unipi.dii.masss_project.classifier
 
 import android.content.Context
 import android.util.Log
-import it.unipi.dii.masss_project.sensors_manager.SensorsCollector
+import it.unipi.dii.masss_project.sensors.SensorsCollector
 import weka.core.Attribute
 import weka.core.DenseInstance
 import weka.core.Instances

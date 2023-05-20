@@ -1,4 +1,4 @@
-package it.unipi.dii.masss_project.sensors_manager
+package it.unipi.dii.masss_project.sensors
 
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.pow

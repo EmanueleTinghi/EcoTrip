@@ -1,4 +1,4 @@
-package it.unipi.dii.masss_project.classification
+package it.unipi.dii.masss_project.classifier
 
 import android.content.Context
 import weka.classifiers.meta.AdaBoostM1
