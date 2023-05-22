@@ -1,3 +1,19 @@
 <resources>
-    <string name="app_name">MaSSS_Project</string>
+    <string name="app_name">EcoTrip</string>
+    <string name="insert_username">Insert username:</string>
+    <string name="login">Login</string>
+    <string name="hint">username</string>
+    <string name="insert_password">Insert password:</string>
+    <string name="password">password</string>
+    <string name="insert_email">Insert email:</string>
+    <string name="email">email</string>
+    <string name="start">Start</string>
+    <string name="view_result">view result</string>
+    <string name="back">back</string>
+    <string name="start_recording">Start recording</string>
+    <string name="next">Next</string>
+    <string name="viewpager">ViewPager</string>
+    <string name="tab_layout_for_user_results">TabLayout for user results</string>
+    <string name="application_logo">Application logo</string>
+    <string name="like">Like</string>
 </resources>
