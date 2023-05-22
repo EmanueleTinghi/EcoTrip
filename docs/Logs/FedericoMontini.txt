@@ -1,0 +1,23 @@
+Number of commits: 25
+
+Lines of code:
+    added: 1231
+    deleted: 742
+
+Diary of coding activities:
+    - Classifier deploy
+    - TransportationModeClassifier
+    - Classification managing
+    - Sensor managing
+    - Sensor classes (Accelerometer)
+    - MainActivity
+    - RecordingActivity
+    - ResultsActivity
+
+Diary of non coding activities:
+    - Participation on Design and Prototyping of the mobile application
+    - Writing project description and project presentation
+    - Study android API for managing sensors (Accelerometer)
+    - Study TensorFlow and Edge Impulse for the development of a classifier
+    - Study Weka for the training and deploying of the classifier
+    - Design and creation of Logo app

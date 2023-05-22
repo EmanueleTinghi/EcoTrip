@@ -1,0 +1,20 @@
+Number of commits: 11
+
+Lines of code:
+    added: 1183
+    deleted: 157
+
+Diary of coding activities:
+- Classification managing
+- Sensor managing
+- Sensor classes (Gyroscope, Magnetometer, Microphone - then removed)
+- MainActivity
+- RecordingActivity (sensors part)
+
+Diary of non coding activities:
+- Participation on Design and Prototyping of the mobile application
+- Writing project description and project presentation
+- Study androir API for sensors managing (Gyroscope, Magnetometer)
+- Study android API for the microphone (sensor no longer used due to problems with sample handling)
+- Study android API for file managing
+- Study Weka for the developing of the classifier

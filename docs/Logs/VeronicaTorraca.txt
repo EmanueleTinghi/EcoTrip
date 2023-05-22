@@ -1,0 +1,21 @@
+Number of commits: 32
+
+Lines of code:
+    added: 2265
+    deleted: 1868
+
+Diary of coding activities:
+- Classifier
+    - ClassificationModule
+    - TransportationModeClassifier
+- Sensor managing
+    - SensorsCollector
+- RecordingActivity (sensorsCollector part)
+- Final clean up and code refactor
+
+Diary of non coding activities:
+- Participation on Design and Prototyping of the mobile application
+- Writing project description and project presentation
+- Dataset analysis and preprocessing for the development of the classifier
+- Study how to manage a classifier model in android
+- Classifier prototyping using different tools and languages to choose the best option (Python + Chaquopy, Edge impulse, Colab + TensorFlow

@@ -1,0 +1,22 @@
+Number of commits: 49
+
+Lines of code:
+    added: 3927
+    deleted: 2165
+
+Diary of coding activities:
+- database
+    - FirebaseAuthManager
+    - FirestoreManager
+- location_manager
+   - GPSHandler
+   - GeocoderTask
+- MainActivity
+- RecordingActivity (GPS managing)
+- ResultActivity (database part)
+- Final code refactor
+
+Diary of non coding activities:
+- Participation on Design and Prototyping of the mobile application
+- Partecipation on writing project description
+- Configuration and installation of the firebase console, to manage login session and database
